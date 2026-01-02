@@ -1,0 +1,101 @@
+using System;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+
+[RequireComponent(typeof(PlayerInput))]
+public class InputManager : MonoBehaviour
+{
+    PlayerInput pi;
+
+    //연속 입력 액션 - 프로퍼티 노출(Move, Sprint, Block 등)
+    public static Vector2 Input { get; private set; }           //이동 프로퍼티
+    public static bool IsSprint { get; private set; }           //왼쪽 쉬프트 프로퍼티
+    public static bool IsBlock {  get; private set; }           //우클릭 프로퍼티(방어)
+
+    //1회성 액션 - 이벤트로 노출
+    public static event Action OnJump;      //점프 입력 이벤트
+    public static event Action OnAttack;    //공격 입력 이벤트
+    public static event Action OnRolling;   //구르기 입력 이벤트
+
+    //Input Sysyem의 액션들
+    InputAction moveAction;
+    InputAction sprintAction;
+    InputAction blockAction;
+    InputAction jumpAction;
+    InputAction attackAction;
+    InputAction rollingAction;
+
+    //콜백 함수들을 저장할 변수들
+    Action<InputAction.CallbackContext> onMovePerformed;
+    Action<InputAction.CallbackContext> onMoveCanceled;
+    Action<InputAction.CallbackContext> onSprintPerformed;
+    Action<InputAction.CallbackContext> onSprntCanceled;
+    Action<InputAction.CallbackContext> onBlockPerformed;
+    Action<InputAction.CallbackContext> onBlockCanceled;
+    Action<InputAction.CallbackContext> onJumpPerformed;
+    Action<InputAction.CallbackContext> onAttackPerformed;
+    Action<InputAction.CallbackContext> onRollingPerformed;
+
+    void OnEnable()
+    {
+        //PlayerInput 컴포넌트 초기화
+        pi = GetComponent<PlayerInput>();
+        pi.defaultActionMap = "Player";
+        pi.defaultControlScheme = "Keboard&Mouse";  // "Default"
+        pi.notificationBehavior = PlayerNotifications.InvokeCSharpEvents;
+
+        //각각의 액션들 찾기
+        moveAction = pi.actions.FindAction("Move");
+        sprintAction = pi.actions.FindAction("Sprint");
+        blockAction = pi.actions.FindAction("Block");
+        jumpAction = pi.actions.FindAction("Jump");
+        attackAction = pi.actions.FindAction("Attack");
+        rollingAction = pi.actions.FindAction("Rolling");
+
+        //무브 액션 콜백등록
+        if (moveAction != null)
+        {
+            onMovePerformed = ctx => Input = ctx.ReadValue<Vector2>();
+            onMoveCanceled = ctx => Input = Vector2.zero;
+            moveAction.performed += onMovePerformed;
+            moveAction.canceled += onMoveCanceled;
+        }
+        //스프린트 액션 콜백등록
+        if (sprintAction != null)
+        {
+            onSprintPerformed = ctx => IsSprint = true;
+            onSprntCanceled = ctx => IsSprint = false;
+            sprintAction.performed += onSprintPerformed;
+            sprintAction.canceled += onSprntCanceled;
+        }
+        //블록 액션 콜백등록
+        if (blockAction != null)
+        {
+            onBlockPerformed = ctx => IsBlock = true;
+            onBlockCanceled = ctx => IsBlock = false;
+            blockAction.performed += onBlockPerformed;
+            blockAction.canceled += onBlockCanceled;
+        }
+        //점프 액션 콜백등록
+        if (jumpAction != null)
+        {
+            onJumpPerformed = ctx => OnJump?.Invoke();
+            jumpAction.performed += onJumpPerformed;
+        }
+        //공격액션 콜백등록
+        if (attackAction != null)
+        {
+            onAttackPerformed = ctx => OnAttack?.Invoke();
+            attackAction.performed += onAttackPerformed;
+        }
+        //구르기액션 콜백등록
+        if (rollingAction != null)
+        {
+            onRollingPerformed = ctx => OnRolling?.Invoke();
+            rollingAction.performed += onRollingPerformed;
+        }
+
+    }
+
+}
