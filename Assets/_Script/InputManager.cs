@@ -18,6 +18,7 @@ public class InputManager : MonoBehaviour
     public static event Action OnAttack;    //공격 입력 이벤트
     public static event Action OnRolling;   //구르기 입력 이벤트
 
+
     //Input Sysyem의 액션들
     InputAction moveAction;
     InputAction sprintAction;
@@ -25,6 +26,7 @@ public class InputManager : MonoBehaviour
     InputAction jumpAction;
     InputAction attackAction;
     InputAction rollingAction;
+
 
     //콜백 함수들을 저장할 변수들
     Action<InputAction.CallbackContext> onMovePerformed;
@@ -36,6 +38,8 @@ public class InputManager : MonoBehaviour
     Action<InputAction.CallbackContext> onJumpPerformed;
     Action<InputAction.CallbackContext> onAttackPerformed;
     Action<InputAction.CallbackContext> onRollingPerformed;
+
+
 
     void OnEnable()
     {

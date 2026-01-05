@@ -1,10 +1,14 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR;
 
 public class PlayerController : MonoBehaviour
 {
     Animator anim;
     CharacterController cc;
+
+    
+
 
     float walkSpeed = 3;
     float runSpeed = 6;
@@ -30,6 +34,8 @@ public class PlayerController : MonoBehaviour
         hashJump = Animator.StringToHash("Jump");
         hashAttack = Animator.StringToHash("Attack");
         hashRolling = Animator.StringToHash("Rolling");
+
+        
     }
 
     private void OnEnable()
@@ -53,6 +59,9 @@ public class PlayerController : MonoBehaviour
     {
         //플레이어 이동
         PlayerMove(InputManager.Input, InputManager.IsSprint);
+        Block(InputManager.IsBlock);
+
+        
     }
 
     /// <summary>
@@ -82,6 +91,12 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void Block(bool isBlocked)
+    {
+        print("Block");
+        anim.SetBool(hashBlock, isBlocked);
+    }
+
     void HandleJump()
     {
         print("Jump");
@@ -97,6 +112,5 @@ public class PlayerController : MonoBehaviour
         print("Rolling");
         anim.SetTrigger(hashRolling);
     }
-
 
 }
