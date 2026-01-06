@@ -13,10 +13,18 @@ public class InputManager : MonoBehaviour
     public static bool IsSprint { get; private set; }           //왼쪽 쉬프트 프로퍼티
     public static bool IsBlock {  get; private set; }           //우클릭 프로퍼티(방어)
 
+    //카메라 바라보는 방향
+    public static Vector2 Look { get; private set; }
+
+
     //1회성 액션 - 이벤트로 노출
     public static event Action OnJump;      //점프 입력 이벤트
     public static event Action OnAttack;    //공격 입력 이벤트
     public static event Action OnRolling;   //구르기 입력 이벤트
+
+    public static event Action OnWeaponNone; //비무장 1번키
+    public static event Action OnWeaponAxe;  //도끼 2번키
+    public static event Action OnWeaponSword;//검 3번키
 
 
     //Input Sysyem의 액션들
@@ -26,6 +34,10 @@ public class InputManager : MonoBehaviour
     InputAction jumpAction;
     InputAction attackAction;
     InputAction rollingAction;
+    InputAction weaponNoneAction;
+    InputAction weaponAxeAction;
+    InputAction weaponSwordAction;
+    InputAction lookAction;
 
 
     //콜백 함수들을 저장할 변수들
@@ -38,6 +50,12 @@ public class InputManager : MonoBehaviour
     Action<InputAction.CallbackContext> onJumpPerformed;
     Action<InputAction.CallbackContext> onAttackPerformed;
     Action<InputAction.CallbackContext> onRollingPerformed;
+    Action<InputAction.CallbackContext> onWeaponNonePerformed;
+    Action<InputAction.CallbackContext> onWeaponAxePerformed;
+    Action<InputAction.CallbackContext> onWeaponSwordPerformed;
+
+    Action<InputAction.CallbackContext> onLookPerformed;
+    Action<InputAction.CallbackContext> onLookCanceled;
 
 
 
@@ -56,6 +74,11 @@ public class InputManager : MonoBehaviour
         jumpAction = pi.actions.FindAction("Jump");
         attackAction = pi.actions.FindAction("Attack");
         rollingAction = pi.actions.FindAction("Rolling");
+        weaponNoneAction = pi.actions.FindAction("WeaponNone");
+        weaponAxeAction = pi.actions.FindAction("WeaponAxe");
+        weaponSwordAction = pi.actions.FindAction("WeaponSword");
+
+        lookAction = pi.actions.FindAction("Look");
 
         //무브 액션 콜백등록
         if (moveAction != null)
@@ -99,7 +122,33 @@ public class InputManager : MonoBehaviour
             onRollingPerformed = ctx => OnRolling?.Invoke();
             rollingAction.performed += onRollingPerformed;
         }
+        //비무장 1번 콜백
+        if (weaponNoneAction != null)
+        {
+            onWeaponNonePerformed = ctx => OnWeaponNone?.Invoke();
+            weaponNoneAction.performed += onWeaponNonePerformed;
+        }
+        //도끼 2번 콜백
+        if (weaponAxeAction != null)
+        {
+            onWeaponAxePerformed = ctx => OnWeaponAxe?.Invoke();
+            weaponAxeAction.performed += onWeaponAxePerformed;
+        }
+        //검 3번 콜백
+        if (weaponSwordAction != null)
+        {
+            onWeaponSwordPerformed = ctx => OnWeaponSword?.Invoke();
+            weaponSwordAction.performed += onWeaponSwordPerformed;
+        }
 
+
+        if (lookAction != null)
+        {
+            onLookPerformed = ctx => Look = ctx.ReadValue<Vector2>();
+            onLookCanceled = ctx => Look = Vector2.zero;
+
+            lookAction.performed += onLookPerformed;
+            lookAction.canceled += onLookCanceled;
+        }
     }
-
 }

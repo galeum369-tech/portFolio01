@@ -7,8 +7,8 @@ public class PlayerController : MonoBehaviour
     Animator anim;
     CharacterController cc;
 
-    
-
+    public Transform cameraRoot;
+    float lPlayerYaw;
 
     float walkSpeed = 3;
     float runSpeed = 6;
@@ -34,8 +34,21 @@ public class PlayerController : MonoBehaviour
         hashJump = Animator.StringToHash("Jump");
         hashAttack = Animator.StringToHash("Attack");
         hashRolling = Animator.StringToHash("Rolling");
+    }
 
-        
+    Vector3 GetCameraRelativeDirection(Vector2 input)
+    {
+        Vector3 forward = cameraRoot.forward;
+        Vector3 right = cameraRoot.right;
+
+        forward.y = 0f;
+        right.y = 0f;
+
+        forward.Normalize();
+        right.Normalize();
+
+        Vector3 dir = forward * input.y + right * input.x;
+        return dir.normalized;
     }
 
     private void OnEnable()
@@ -60,9 +73,9 @@ public class PlayerController : MonoBehaviour
         //플레이어 이동
         PlayerMove(InputManager.Input, InputManager.IsSprint);
         Block(InputManager.IsBlock);
-
-        
     }
+    
+
 
     /// <summary>
     /// 플레이어 이동처리
@@ -71,29 +84,34 @@ public class PlayerController : MonoBehaviour
     /// <param name="isLeftShiftPressed"></param>
     void PlayerMove(Vector2 input, bool isLeftShiftPressed)
     {
-        if (input.magnitude > 0.1f)
-        {
-            //이동 처리
-            Vector3 dir = new Vector3(input.x, 0f, input.y);
-            dir.Normalize();
-            float curSpeed = isLeftShiftPressed ? runSpeed : walkSpeed;
-            cc.Move(dir * curSpeed * Time.deltaTime);
-
-            //이동 애니메이션
-            float animSpeed = isLeftShiftPressed ? 2f : 1f;
-            anim.SetFloat(hashMoveX, input.x);
-            anim.SetFloat(hashMoveY, input.y * animSpeed);
-        }
-        else
+        if (input.magnitude < 0.1f)
         {
             anim.SetFloat(hashMoveX, 0f);
             anim.SetFloat(hashMoveY, 0f);
+            return;
         }
+
+        Vector3 moveDir = GetCameraRelativeDirection(input);
+
+        float curSpeed = isLeftShiftPressed ? runSpeed : walkSpeed;
+        cc.Move(moveDir * curSpeed * Time.deltaTime);
+
+        // 캐릭터 회전 (이동 방향으로)
+        Quaternion targetRot = Quaternion.LookRotation(moveDir);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            targetRot,
+            Time.deltaTime * 10f
+        );
+
+        // 애니메이션
+        anim.SetFloat(hashMoveX, input.x);
+        anim.SetFloat(hashMoveY, input.y * (isLeftShiftPressed ? 2f : 1f));
     }
+
 
     void Block(bool isBlocked)
     {
-        print("Block");
         anim.SetBool(hashBlock, isBlocked);
     }
 

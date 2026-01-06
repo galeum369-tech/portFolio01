@@ -61,31 +61,49 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Basic",
+                    "name": "WeaponNone",
                     "type": "Button",
-                    "id": "53944c86-5358-4719-9271-ddd3a06de90f",
+                    "id": "1db89bfd-4ccd-46ed-bb28-ae6b4a7cd338",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Axe",
+                    "name": "WeaponAxe",
                     "type": "Button",
-                    "id": "35a21a6c-dfd0-47ca-b4e7-88885d232765",
+                    "id": "8b66eb40-657d-4d78-9ffe-32dfdc4b0a65",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Sword",
+                    "name": "WeaponSword",
                     "type": "Button",
-                    "id": "106bf08e-dea3-48a3-81aa-c713807764f3",
+                    "id": "c12c1a62-6905-4c49-802b-4baed0e4d1ac",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "LockOn",
+                    "type": "Button",
+                    "id": "9f8e0f1b-8dd6-4b4f-9da1-5cd5ce2b06c1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Look",
+                    "type": "Value",
+                    "id": "7ee067bb-0021-4f0f-b280-52978a0c2450",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -201,34 +219,56 @@
                 },
                 {
                     "name": "",
-                    "id": "2cab4da1-a9da-4c0f-bfcf-6bd6aca97157",
+                    "id": "2237835e-23a5-41cc-a8b0-91834c7b1dc7",
                     "path": "<Keyboard>/1",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Basic",
+                    "action": "WeaponNone",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "0b02db83-2e32-4b8c-9036-4a7148673bca",
+                    "id": "289cedae-78f7-494b-81b6-9c0e26cce490",
                     "path": "<Keyboard>/2",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Axe",
+                    "action": "WeaponAxe",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "71578b33-508d-417d-93e9-5f3d3ade97fe",
+                    "id": "30d65387-9770-4cd5-ae72-fc35d075d3fb",
                     "path": "<Keyboard>/3",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Sword",
+                    "action": "WeaponSword",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8f968070-56f9-4a5e-a357-5ee0dc6ac31e",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LockOn",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "faa60bf5-9a61-4c2d-aed0-8d0348f31b0c",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
