@@ -11,12 +11,13 @@ public class ThirdPersonCameraController : MonoBehaviour
 
     void LateUpdate()
     {
-        Vector2 look = InputManager.Look; // ⭐ 여기 중요
+        Vector2 look = InputManager.Look;
 
         yaw += look.x * sensitivity;
         pitch -= look.y * sensitivity;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
 
-        transform.localRotation = Quaternion.Euler(pitch, yaw, 0f);
+        transform.rotation = Quaternion.Euler(pitch, yaw, 0f);
     }
 }
+

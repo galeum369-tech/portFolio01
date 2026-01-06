@@ -7,9 +7,6 @@ public class PlayerController : MonoBehaviour
     Animator anim;
     CharacterController cc;
 
-    public Transform cameraRoot;
-    float lPlayerYaw;
-
     float walkSpeed = 3;
     float runSpeed = 6;
 
@@ -35,21 +32,7 @@ public class PlayerController : MonoBehaviour
         hashAttack = Animator.StringToHash("Attack");
         hashRolling = Animator.StringToHash("Rolling");
     }
-
-    Vector3 GetCameraRelativeDirection(Vector2 input)
-    {
-        Vector3 forward = cameraRoot.forward;
-        Vector3 right = cameraRoot.right;
-
-        forward.y = 0f;
-        right.y = 0f;
-
-        forward.Normalize();
-        right.Normalize();
-
-        Vector3 dir = forward * input.y + right * input.x;
-        return dir.normalized;
-    }
+   
 
     private void OnEnable()
     {
