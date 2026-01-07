@@ -7,6 +7,10 @@ public class PlayerController : MonoBehaviour
     Animator anim;
     CharacterController cc;
 
+    public Transform cameraRoot;
+
+    public bool IsLockOn = false;
+
     float walkSpeed = 3;
     float runSpeed = 6;
 
@@ -57,7 +61,7 @@ public class PlayerController : MonoBehaviour
         PlayerMove(InputManager.Input, InputManager.IsSprint);
         Block(InputManager.IsBlock);
     }
-    
+
 
 
     /// <summary>
@@ -74,12 +78,24 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        Vector3 moveDir = GetCameraRelativeDirection(input);
+        // 🔥 카메라 기준 이동 방향 계산
+        Vector3 camForward = cameraRoot.forward;
+        Vector3 camRight = cameraRoot.right;
 
+        camForward.y = 0f;
+        camRight.y = 0f;
+
+        camForward.Normalize();
+        camRight.Normalize();
+
+        Vector3 moveDir = camForward * input.y + camRight * input.x;
+        moveDir.Normalize();
+
+        // 이동
         float curSpeed = isLeftShiftPressed ? runSpeed : walkSpeed;
         cc.Move(moveDir * curSpeed * Time.deltaTime);
 
-        // 캐릭터 회전 (이동 방향으로)
+        // 캐릭터 회전 (이동 방향으로만)
         Quaternion targetRot = Quaternion.LookRotation(moveDir);
         transform.rotation = Quaternion.Slerp(
             transform.rotation,
@@ -87,10 +103,23 @@ public class PlayerController : MonoBehaviour
             Time.deltaTime * 10f
         );
 
-        // 애니메이션
-        anim.SetFloat(hashMoveX, input.x);
-        anim.SetFloat(hashMoveY, input.y * (isLeftShiftPressed ? 2f : 1f));
+        float animSpeedMul = isLeftShiftPressed ? 2f : 1f;
+
+        if (!IsLockOn)
+        {
+            // 🔥 비락온: 어떤 키든 전진 애니메이션
+            anim.SetFloat(hashMoveX, 0f);
+            anim.SetFloat(hashMoveY, 1f * animSpeedMul);
+        }
+        else
+        {
+            // 🔥 락온: 캐릭터 기준 스트레이프
+            Vector3 localMoveDir = transform.InverseTransformDirection(moveDir);
+            anim.SetFloat(hashMoveX, localMoveDir.x);
+            anim.SetFloat(hashMoveY, localMoveDir.z * animSpeedMul);
+        }
     }
+
 
 
     void Block(bool isBlocked)

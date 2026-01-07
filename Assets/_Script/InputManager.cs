@@ -25,6 +25,7 @@ public class InputManager : MonoBehaviour
     public static event Action OnWeaponNone; //비무장 1번키
     public static event Action OnWeaponAxe;  //도끼 2번키
     public static event Action OnWeaponSword;//검 3번키
+    public static event Action OnMasic; //마법 4번키
 
 
     //Input Sysyem의 액션들
@@ -37,6 +38,7 @@ public class InputManager : MonoBehaviour
     InputAction weaponNoneAction;
     InputAction weaponAxeAction;
     InputAction weaponSwordAction;
+    InputAction masicAction;
     InputAction lookAction;
 
 
@@ -53,6 +55,7 @@ public class InputManager : MonoBehaviour
     Action<InputAction.CallbackContext> onWeaponNonePerformed;
     Action<InputAction.CallbackContext> onWeaponAxePerformed;
     Action<InputAction.CallbackContext> onWeaponSwordPerformed;
+    Action<InputAction.CallbackContext> onMasicPerformed;
 
     Action<InputAction.CallbackContext> onLookPerformed;
     Action<InputAction.CallbackContext> onLookCanceled;
@@ -77,6 +80,7 @@ public class InputManager : MonoBehaviour
         weaponNoneAction = pi.actions.FindAction("WeaponNone");
         weaponAxeAction = pi.actions.FindAction("WeaponAxe");
         weaponSwordAction = pi.actions.FindAction("WeaponSword");
+        masicAction = pi.actions.FindAction("Masic");
 
         lookAction = pi.actions.FindAction("Look");
 
@@ -140,7 +144,12 @@ public class InputManager : MonoBehaviour
             onWeaponSwordPerformed = ctx => OnWeaponSword?.Invoke();
             weaponSwordAction.performed += onWeaponSwordPerformed;
         }
-
+        //마법 4번 콜백
+        if (masicAction != null)
+        {
+            onMasicPerformed = ctx => OnMasic?.Invoke();
+            masicAction.performed += onMasicPerformed;
+        }
 
         if (lookAction != null)
         {
