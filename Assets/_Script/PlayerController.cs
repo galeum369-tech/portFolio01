@@ -14,6 +14,12 @@ public class PlayerController : MonoBehaviour
     float walkSpeed = 3;
     float runSpeed = 6;
 
+    //중력
+    float gravity = -20f;
+    float verticalVelocity;
+    bool isGrounded;
+
+
     //Animator Hash ID
     int hashMoveX;
     int hashMoveY;
@@ -60,8 +66,21 @@ public class PlayerController : MonoBehaviour
         //플레이어 이동
         PlayerMove(InputManager.Input, InputManager.IsSprint);
         Block(InputManager.IsBlock);
+        ApplyGravity();
     }
 
+    void ApplyGravity()
+    {
+        isGrounded = cc.isGrounded;
+
+        if (isGrounded && verticalVelocity < 0f)
+        {
+            verticalVelocity = -2f; // 바닥에 붙이기
+        }
+
+        verticalVelocity += gravity * Time.deltaTime;
+        cc.Move(Vector3.up * verticalVelocity * Time.deltaTime);
+    }
 
 
     /// <summary>
@@ -95,13 +114,17 @@ public class PlayerController : MonoBehaviour
         float curSpeed = isLeftShiftPressed ? runSpeed : walkSpeed;
         cc.Move(moveDir * curSpeed * Time.deltaTime);
 
-        // 캐릭터 회전 (이동 방향으로만)
-        Quaternion targetRot = Quaternion.LookRotation(moveDir);
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
-            targetRot,
-            Time.deltaTime * 10f
-        );
+        // 캐릭터 회전
+        if (!IsLockOn)
+        {
+            Quaternion targetRot = Quaternion.LookRotation(moveDir);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRot,
+                Time.deltaTime * 10f
+            );
+        }
+
 
         float animSpeedMul = isLeftShiftPressed ? 2f : 1f;
 

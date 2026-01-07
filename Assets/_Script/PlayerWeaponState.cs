@@ -71,6 +71,7 @@ public class PlayerWeaponState : MonoBehaviour
 
         anim.SetLayerWeight(axeLayer, 0f);
         anim.SetLayerWeight(swordLayer, 0f);
+        anim.SetLayerWeight(masicLayer, 0f);
 
         switch (nextWeapon)
         {
