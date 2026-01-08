@@ -13,6 +13,8 @@ public class PlayerWeaponState : MonoBehaviour
     int nextWeapon; // 0:none, 1:axe, 2:sword
     bool isSwapping;
 
+    public bool isCombo = false;
+
     [Header("무기 프리팹")]
     public GameObject axeEquip;
     public GameObject axeUnequip;
@@ -37,19 +39,41 @@ public class PlayerWeaponState : MonoBehaviour
 
     void OnEnable()
     {
-        InputManager.OnWeaponNone += () => RequestEquip(0);
-        InputManager.OnWeaponAxe += () => RequestEquip(1);
-        InputManager.OnWeaponSword += () => RequestEquip(2);
-        InputManager.OnMasic += () => RequestEquip(3);
+        InputManager.OnWeaponNone += OnWeaponNone;
+        InputManager.OnWeaponAxe += OnWeaponAxe;
+        InputManager.OnWeaponSword += OnWeaponSword;
+        InputManager.OnMasic += OnWeaponMagic;
     }
 
     void OnDisable()
     {
-        InputManager.OnWeaponNone -= () => RequestEquip(0);
-        InputManager.OnWeaponAxe -= () => RequestEquip(1);
-        InputManager.OnWeaponSword -= () => RequestEquip(2);
-        InputManager.OnMasic -= () => RequestEquip(3);
+        InputManager.OnWeaponNone -= OnWeaponNone;
+        InputManager.OnWeaponAxe -= OnWeaponAxe;
+        InputManager.OnWeaponSword -= OnWeaponSword;
+        InputManager.OnMasic -= OnWeaponMagic;
     }
+
+
+    void OnWeaponNone()
+    {
+        RequestEquip(0);
+    }
+
+    void OnWeaponAxe()
+    {
+        RequestEquip(1);
+    }
+
+    void OnWeaponSword()
+    {
+        RequestEquip(2);
+    }
+
+    void OnWeaponMagic()
+    {
+        RequestEquip(3);
+    }
+
 
     void RequestEquip(int weapon)
     {
@@ -68,6 +92,8 @@ public class PlayerWeaponState : MonoBehaviour
         masic.SetActive(false);
         axeUnequip.SetActive(true);
         swordUnequip.SetActive(true);
+
+        isCombo = true;
 
         anim.SetLayerWeight(axeLayer, 0f);
         anim.SetLayerWeight(swordLayer, 0f);
@@ -89,8 +115,10 @@ public class PlayerWeaponState : MonoBehaviour
             case 3: // Masic
                 masic.SetActive(true);
                 anim.SetLayerWeight(masicLayer, 1f);
+                isCombo = false;
                 break;
         }
+        print($"콤보시스템 {isCombo}");
     }
 
     // Animation Event (끝)

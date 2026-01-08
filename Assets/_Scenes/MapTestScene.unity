@@ -119,6 +119,43 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &24484262 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 712732101019960288, guid: 6b028a0c2ceb2fe40ae6fa77624ba085, type: 3}
+  m_PrefabInstance: {fileID: 5827500069359748265}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &24484266 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2617778397379754306, guid: 6b028a0c2ceb2fe40ae6fa77624ba085, type: 3}
+  m_PrefabInstance: {fileID: 5827500069359748265}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24484262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba79436d52ac704a85170fa7dde0600, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerState
+--- !u!95 &24484267 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 6075318968298341152, guid: 6b028a0c2ceb2fe40ae6fa77624ba085, type: 3}
+  m_PrefabInstance: {fileID: 5827500069359748265}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &24484268
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 24484262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21c57940f14abbd4aaa29eb09c4397df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
+  anim: {fileID: 24484267}
+  weaponState: {fileID: 24484266}
+  isAttacking: 0
+  stuckTimeOut: 5
 --- !u!1 &608180399
 GameObject:
   m_ObjectHideFlags: 0
@@ -581,6 +618,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6075318968298341152, guid: 6b028a0c2ceb2fe40ae6fa77624ba085, type: 3}
+      propertyPath: m_WarningMessage
+      value: "\nBinding warning: Some generic clip(s) animate transforms that are
+        already bound by a Humanoid avatar. These transforms can only be changed
+        by Humanoid clips.\n\tTransform 'PT_Head'\n\tTransform 'PT_Neck'\n\tTransform
+        'PT_Head'\n\tTransform 'PT_Neck'\n\tTransform 'PT_Head'\n\tTransform 'PT_Neck'"
+      objectReference: {fileID: 0}
+    - target: {fileID: 6613614498674948428, guid: 6b028a0c2ceb2fe40ae6fa77624ba085, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -4
+      objectReference: {fileID: 0}
     - target: {fileID: 8979524687044945691, guid: 6b028a0c2ceb2fe40ae6fa77624ba085, type: 3}
       propertyPath: m_Name
       value: AllRoot
@@ -588,7 +636,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 712732101019960288, guid: 6b028a0c2ceb2fe40ae6fa77624ba085, type: 3}
+      insertIndex: 3
+      addedObject: {fileID: 24484268}
   m_SourcePrefab: {fileID: 100100000, guid: 6b028a0c2ceb2fe40ae6fa77624ba085, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

@@ -7,6 +7,8 @@ public class PlayerController : MonoBehaviour
     Animator anim;
     CharacterController cc;
 
+    PlayerCombat pCombat;
+
     public Transform cameraRoot;
 
     public bool IsLockOn = false;
@@ -25,7 +27,6 @@ public class PlayerController : MonoBehaviour
     int hashMoveY;
     int hashBlock;
     int hashJump;
-    int hashAttack;
     int hashRolling;
 
     void Awake()
@@ -33,13 +34,14 @@ public class PlayerController : MonoBehaviour
         //컴포넌트 참조 초기화
         anim = GetComponentInChildren<Animator>();
         cc = GetComponent<CharacterController>();
+        pCombat = GetComponentInChildren<PlayerCombat>();
 
+        
         //Animator Hash Init
         hashMoveX = Animator.StringToHash("moveX");
         hashMoveY = Animator.StringToHash("moveY");
         hashBlock = Animator.StringToHash("Block");
         hashJump = Animator.StringToHash("Jump");
-        hashAttack = Animator.StringToHash("Attack");
         hashRolling = Animator.StringToHash("Rolling");
     }
    
@@ -90,6 +92,13 @@ public class PlayerController : MonoBehaviour
     /// <param name="isLeftShiftPressed"></param>
     void PlayerMove(Vector2 input, bool isLeftShiftPressed)
     {
+        if (pCombat != null && pCombat.isAttacking)
+        {
+            anim.SetFloat(hashMoveX, 0f);
+            anim.SetFloat(hashMoveY, 0f);
+            return;
+        }
+
         if (input.magnitude < 0.1f)
         {
             anim.SetFloat(hashMoveX, 0f);
@@ -157,8 +166,7 @@ public class PlayerController : MonoBehaviour
     }
     void HandleAttack()
     {
-        print("Attack");
-        anim.SetTrigger(hashAttack);
+        pCombat.OnCombo();
     }
     void HandleRolling()
     {
