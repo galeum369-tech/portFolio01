@@ -9,7 +9,7 @@ public class PlayerCombat : MonoBehaviour
 
     // 상태
     public bool isAttacking = false;
-    int comboInputCount = 0;
+    bool isComboReserved = false;
     bool isInputWindowOpen = false;
 
 
@@ -40,19 +40,18 @@ public class PlayerCombat : MonoBehaviour
         {
             ForceEndCombo();
         }
-
-
-        if (comboInputCount >0) print(comboInputCount);
     }
     void ForceEndCombo()
     {
         isAttacking = false;
         isInputWindowOpen = false;
-        comboInputCount = 0;
+        isComboReserved = false;
         stuckTimer = 0f;
+
 
         anim.ResetTrigger(attackHash);
     }
+
 
     /*───────────────────────────────*
      * 입력 처리
@@ -64,58 +63,58 @@ public class PlayerCombat : MonoBehaviour
             anim.SetTrigger(attackHash);
             return;
         }
-
         if (isAttacking == false)
         {
             StartCombo();
         }
-        else if (isInputWindowOpen == true)
+        else if (isInputWindowOpen)
         {
-            comboInputCount++;
+            // 입력 창이 열려있을 때 버튼을 누르면 다음 공격 예약
+            isComboReserved = true;
         }
     }
 
     void StartCombo()
     {
         isAttacking = true;
+        isComboReserved = false;
         anim.SetTrigger(attackHash);
-        print("첫번째 공격");
     }
 
     /*───────────────────────────────*
-     * Animation Events - Combo
+     * Animation Events
      *───────────────────────────────*/
 
-    // 🔔 입력 받기 시작
+    // 🔔 입력 창 열기 (애니메이션 중간쯤)
     public void ComboInputStart()
     {
         isInputWindowOpen = true;
-        comboInputCount = 0;
+        isComboReserved = false; 
     }
 
-
-
-    // 🔔 입력 받기 종료
-    public void ComboInputEnd()
+    // 🔔 실제 다음 공격으로 넘어갈지 결정하는 시점 
+    // (애니메이션 끝부분이 아니라, '연결'이 자연스러운 지점에 배치)
+    public void ComboCheck()
     {
         isInputWindowOpen = false;
 
-        if (comboInputCount > 0)
+        if (isComboReserved)
         {
-            comboInputCount = 0;
+            isComboReserved = false;
+            // 공격 트리거를 다시 작동
             anim.SetTrigger(attackHash);
-        }
-        else
-        {
-            EndCombo();
         }
     }
 
-
-    void EndCombo()
+    // 🔔 전체 공격 상태 종료 (애니메이션이 완전히 끝날 때쯤)
+    public void EndCombo()
     {
         isAttacking = false;
-        stuckTimer = 0f;
+        isComboReserved = false;
+        isInputWindowOpen = false;
+        
+        // Idle로 돌아갈 때 남아있을지 모르는 트리거 청소
+        anim.ResetTrigger(attackHash);
     }
 
     /*───────────────────────────────*

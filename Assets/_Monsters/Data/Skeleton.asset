@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6be6f677cf44fd43bb5e420058de8a0, type: 3}
+  m_Name: Skeleton
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterBaseData
+  maxHP: 0
+  maxStamina: 0
+  attackPower: 0
+  defense: 0
+  moveSpeed: 0
+  maxPoise: 0
+  hpRecoveryPerSecond: 0
+  staminaRecoveryPerSecond: 10
+  poiseRecoveryPerSecond: 0
+  staminaRecoveryDelay: 0.15
+  hpLowThreshold: 0.3
+  staminaLowThreshold: 0.2
+  staminaHighThreshold: 0.6
+  preferredRange: 2
+  engageRange: 6
+  disengageRange: 8
+  baseHostility: 2
+  hitReactionWeight: 0.5
+  pressureTolerance: 0.5
