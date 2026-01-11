@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Data/Player Stats")]
-public class PlayerStatData : ScriptableObject
+public class PlayerBaseData : ScriptableObject
 {
     [Header("체력/스테미나")]
     public int maxHP;
@@ -13,6 +13,9 @@ public class PlayerStatData : ScriptableObject
 
     [Header("방어")]
     public int DEF;
+
+    [Header("강인도")]
+    public int Poise;
 
     [Header("유틸")]
     [Tooltip("스테미나 회복속도")]
@@ -27,6 +30,4 @@ public class PlayerStatData : ScriptableObject
     public int runCostPerSecond;
     [Tooltip("구르기")]
     public int rollingCost;
-    [Tooltip("점프")]
-    public int jumpCost;
 }

@@ -16,7 +16,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Jump",
+                    "name": "Access",
                     "type": "Button",
                     "id": "674f3526-e25c-44a6-9e3c-a9239f3ec005",
                     "expectedControlType": "",
@@ -174,11 +174,11 @@
                 {
                     "name": "",
                     "id": "eea90f73-74d5-4bf1-8b3a-356da50d1024",
-                    "path": "<Keyboard>/f",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Jump",
+                    "action": "Access",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
