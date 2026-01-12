@@ -18,7 +18,7 @@ public class InputManager : MonoBehaviour
 
 
     //1회성 액션 - 이벤트로 노출
-    public static event Action OnJump;      //점프 입력 이벤트
+    public static event Action OnAccess;      //상호작용 입력 이벤트
     public static event Action OnAttack;    //공격 입력 이벤트
     public static event Action OnRolling;   //구르기 입력 이벤트
 
@@ -32,7 +32,7 @@ public class InputManager : MonoBehaviour
     InputAction moveAction;
     InputAction sprintAction;
     InputAction blockAction;
-    InputAction jumpAction;
+    InputAction accessAction;
     InputAction attackAction;
     InputAction rollingAction;
     InputAction weaponNoneAction;
@@ -49,7 +49,7 @@ public class InputManager : MonoBehaviour
     Action<InputAction.CallbackContext> onSprntCanceled;
     Action<InputAction.CallbackContext> onBlockPerformed;
     Action<InputAction.CallbackContext> onBlockCanceled;
-    Action<InputAction.CallbackContext> onJumpPerformed;
+    Action<InputAction.CallbackContext> onAccessPerformed;
     Action<InputAction.CallbackContext> onAttackPerformed;
     Action<InputAction.CallbackContext> onRollingPerformed;
     Action<InputAction.CallbackContext> onWeaponNonePerformed;
@@ -74,7 +74,7 @@ public class InputManager : MonoBehaviour
         moveAction = pi.actions.FindAction("Move");
         sprintAction = pi.actions.FindAction("Sprint");
         blockAction = pi.actions.FindAction("Block");
-        jumpAction = pi.actions.FindAction("Jump");
+        accessAction = pi.actions.FindAction("Access");
         attackAction = pi.actions.FindAction("Attack");
         rollingAction = pi.actions.FindAction("Rolling");
         weaponNoneAction = pi.actions.FindAction("WeaponNone");
@@ -109,10 +109,10 @@ public class InputManager : MonoBehaviour
             blockAction.canceled += onBlockCanceled;
         }
         //점프 액션 콜백등록
-        if (jumpAction != null)
+        if (accessAction != null)
         {
-            onJumpPerformed = ctx => OnJump?.Invoke();
-            jumpAction.performed += onJumpPerformed;
+            onAccessPerformed = ctx => OnAccess?.Invoke();
+            accessAction.performed += onAccessPerformed;
         }
         //공격액션 콜백등록
         if (attackAction != null)

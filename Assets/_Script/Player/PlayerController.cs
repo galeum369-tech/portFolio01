@@ -26,7 +26,6 @@ public class PlayerController : MonoBehaviour
     int hashMoveX;
     int hashMoveY;
     int hashBlock;
-    int hashJump;
     int hashRolling;
 
     void Awake()
@@ -41,7 +40,6 @@ public class PlayerController : MonoBehaviour
         hashMoveX = Animator.StringToHash("moveX");
         hashMoveY = Animator.StringToHash("moveY");
         hashBlock = Animator.StringToHash("Block");
-        hashJump = Animator.StringToHash("Jump");
         hashRolling = Animator.StringToHash("Rolling");
     }
    
@@ -51,7 +49,6 @@ public class PlayerController : MonoBehaviour
         //InputManager 이벤트 등록
         //1회성 입력되는 액션만 등록
         InputManager.OnAttack += HandleAttack;
-        InputManager.OnJump += HandleJump;
         InputManager.OnRolling += HandleRolling;
     }
     private void OnDisable()
@@ -59,7 +56,6 @@ public class PlayerController : MonoBehaviour
         //InputManager 이벤트 해제
         //1회성 입력되는 액션만 해제
         InputManager.OnAttack -= HandleAttack;
-        InputManager.OnJump -= HandleJump;
         InputManager.OnRolling -= HandleRolling;
     }
 
@@ -159,11 +155,6 @@ public class PlayerController : MonoBehaviour
         anim.SetBool(hashBlock, isBlocked);
     }
 
-    void HandleJump()
-    {
-        print("Jump");
-        anim.SetTrigger(hashJump);
-    }
     void HandleAttack()
     {
         pCombat.OnCombo();

@@ -20,6 +20,10 @@ public class MonsterCore : MonoBehaviour
     public float CurrentStamina { get; private set; }
     public float CurrentPoise { get; private set; }
 
+    // 마지막으로 맞은 공격 ID
+    int lastHitAttackId = -1;
+
+
     // 마지막 스태미나 소비 시점 (회복 딜레이 계산용)
     float lastStaminaConsumeTime = -999f;
 
@@ -75,6 +79,20 @@ public class MonsterCore : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 해당 공격 ID로 피격 가능한지 여부
+    /// 같은 공격(AttackId)에 대해서는 한 번만 맞게 한다.
+    /// </summary>
+    public bool CanBeHit(int attackId)
+    {
+        if (lastHitAttackId == attackId)
+            return false;
+
+        lastHitAttackId = attackId;
+        return true;
+    }
+
+
     /*───────────────────────────────*
      * 데미지 / 소비 처리
      *───────────────────────────────*/
@@ -95,8 +113,10 @@ public class MonsterCore : MonoBehaviour
     }
 
     /// <summary>
-    /// 강인도 데미지를 적용
-    /// 반환값이 true면 강인도 붕괴(확정 경직)
+    /// 강인도 판정용 함수
+    /// - 일반 몬스터: true → Hit 리액션 여부 판단
+    /// - 보스 몬스터: true → 경직 / 스태거 트리거 판단
+    /// 해석은 FSM에서 담당한다.
     /// </summary>
     public bool ApplyPoiseDamage(float poiseDamage)
     {

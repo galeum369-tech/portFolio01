@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c6be6f677cf44fd43bb5e420058de8a0, type: 3}
   m_Name: Skeleton
   m_EditorClassIdentifier: Assembly-CSharp::MonsterBaseData
-  maxHP: 0
-  maxStamina: 0
-  attackPower: 0
-  defense: 0
-  moveSpeed: 0
-  maxPoise: 0
+  maxHP: 80
+  maxStamina: 40
+  attackPower: 15
+  defense: 5
+  moveSpeed: 2
+  maxPoise: 20
   hpRecoveryPerSecond: 0
   staminaRecoveryPerSecond: 10
   poiseRecoveryPerSecond: 0

@@ -117,8 +117,40 @@ public class PlayerCombat : MonoBehaviour
         anim.ResetTrigger(attackHash);
     }
 
+    // Animation Event
+    public void AttackStart()
+    {
+        var weapon = weaponState.CurrentWeapon;
+        if (weapon == null) return;
+
+        weapon.StartAttack();
+    }
+
+    // Animation Event
+    public void AttackEnd()
+    {
+        var weapon = weaponState.CurrentWeapon;
+        if (weapon == null) return;
+
+        weapon.EndAttack();
+    }
+
+
+    //애니메이션 이벤트 - 프로젝타일 생성
+    public void FireProjectile(GameObject projectilePrefab, Transform firePoint)
+    {
+        if (projectilePrefab == null || firePoint == null)
+            return;
+
+        Instantiate(
+            projectilePrefab,
+            firePoint.position,
+            firePoint.rotation
+        );
+    }
+
     /*───────────────────────────────*
-     * Animation Events - HitBox
+     * 애니메이션 이벤트 - 히트박스 온 오프
      *───────────────────────────────*/
 
     public void AttackStart(GameObject hitBox)

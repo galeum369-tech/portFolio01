@@ -10,6 +10,9 @@ public class PlayerWeaponState : MonoBehaviour
     int masicLayer;
     int weaponSwapHash;
 
+    public WeaponBase CurrentWeapon { get; private set; }
+
+
     int nextWeapon; // 0:none, 1:axe, 2:sword
     bool isSwapping;
 
@@ -101,21 +104,29 @@ public class PlayerWeaponState : MonoBehaviour
 
         switch (nextWeapon)
         {
+            case 0: // None (맨손)
+                CurrentWeapon = GetComponentInChildren<WeaponBase>();
+                break;
+
             case 1: // Axe
                 axeEquip.SetActive(true);
                 axeUnequip.SetActive(false);
                 anim.SetLayerWeight(axeLayer, 1f);
+                CurrentWeapon = axeEquip.GetComponent<WeaponBase>();
                 break;
 
             case 2: // Sword
                 swordEquip.SetActive(true);
                 swordUnequip.SetActive(false);
                 anim.SetLayerWeight(swordLayer, 1f);
+                CurrentWeapon = swordEquip.GetComponent<WeaponBase>();
                 break;
-            case 3: // Masic
+
+            case 3: // Magic
                 masic.SetActive(true);
                 anim.SetLayerWeight(masicLayer, 1f);
                 isCombo = false;
+                CurrentWeapon = null; // 마법은 WeaponBase 없음
                 break;
         }
         print($"콤보시스템 {isCombo}");
