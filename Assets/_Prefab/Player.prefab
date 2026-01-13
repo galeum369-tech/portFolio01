@@ -1122,6 +1122,7 @@ GameObject:
   - component: {fileID: 8807406290885850780}
   - component: {fileID: 7611443031332738543}
   - component: {fileID: 8366463382991828373}
+  - component: {fileID: 6352858767834539440}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -1186,6 +1187,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   cameraRoot: {fileID: 0}
   IsLockOn: 0
+  rollDistance: 4
+  rollDuration: 0.4
+  backstepDistance: 2
+  backstepDuration: 0.25
 --- !u!114 &8366463382991828373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1199,6 +1204,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LockOnSystem
   lockOnTarget: {fileID: 0}
+--- !u!114 &6352858767834539440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7071466957036107151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac63c1e7ad3dff840a177fd384ff3aa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCore
+  data: {fileID: 11400000, guid: 1caa3a38ff1f722468cb9ffb4fd01c4d, type: 2}
 --- !u!1 &7650775765289939742
 GameObject:
   m_ObjectHideFlags: 0
@@ -2430,6 +2448,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2766520990056341028, guid: b4a79bd2a2c960f4f8f45e4014978a83, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2998131675446330624}
+    - targetCorrespondingSourceObject: {fileID: 2766520990056341028, guid: b4a79bd2a2c960f4f8f45e4014978a83, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5999020895354148891}
   m_SourcePrefab: {fileID: 100100000, guid: b4a79bd2a2c960f4f8f45e4014978a83, type: 3}
 --- !u!4 &58245598691032479 stripped
 Transform:
@@ -2754,6 +2775,22 @@ MonoBehaviour:
   - m_Rig: {fileID: 7924616502105361514}
     m_Active: 1
   m_Effectors: []
+--- !u!114 &5999020895354148891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6782349344147829890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21c57940f14abbd4aaa29eb09c4397df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
+  anim: {fileID: 266911615952450626}
+  weaponState: {fileID: 8336069793918094880}
+  isAttacking: 0
+  stuckTimeOut: 5
 --- !u!4 &6904303399638399250 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2858120797959443380, guid: b4a79bd2a2c960f4f8f45e4014978a83, type: 3}

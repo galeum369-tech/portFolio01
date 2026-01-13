@@ -22,10 +22,19 @@ public class PlayerCore : MonoBehaviour
 
     public bool IsDead => CurrentHP <= 0;
 
-    float exhaustTimer; // 스태미나 회복 딜레이 타이머
+    // 스태미나 회복 딜레이 타이머
+    float exhaustTimer;
 
     void Awake()
     {
+        // 데이터 누락 방어
+        if (data == null)
+        {
+            Debug.LogError("PlayerBaseData가 설정되지 않았습니다.", this);
+            enabled = false;
+            return;
+        }
+
         CurrentHP = data.maxHP;
         CurrentStamina = data.maxStamina;
         CurrentPoise = data.Poise;
@@ -33,12 +42,20 @@ public class PlayerCore : MonoBehaviour
 
     void Update()
     {
+        // 사망 시 리소스 처리 중단
+        if (IsDead) return;
+
         RecoverStamina(Time.deltaTime);
     }
 
     /*───────────────────────────────*
      * 스태미나 회복
      *───────────────────────────────*/
+
+    /// <summary>
+    /// 스태미나 자동 회복 처리
+    /// - 스태미나 소비 후 딜레이(exhaustDelay) 동안 회복 정지
+    /// </summary>
     void RecoverStamina(float deltaTime)
     {
         if (exhaustTimer > 0f)
@@ -56,11 +73,19 @@ public class PlayerCore : MonoBehaviour
     /*───────────────────────────────*
      * 스태미나 소모
      *───────────────────────────────*/
+
+    /// <summary>
+    /// 스태미나 사용 가능 여부 확인
+    /// </summary>
     public bool CanUseStamina(int amount)
     {
         return CurrentStamina >= amount;
     }
 
+    /// <summary>
+    /// 스태미나 소모 시도
+    /// - 성공 시 회복 딜레이 시작
+    /// </summary>
     public bool TryConsumeStamina(int amount)
     {
         if (CurrentStamina < amount)
@@ -71,13 +96,34 @@ public class PlayerCore : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 달리기용 스태미나 소모
+    /// (초당 소모량 기반)
+    /// </summary>
+    public bool TryConsumeRunStamina(float deltaTime)
+    {
+        int cost = Mathf.RoundToInt(data.runCostPerSecond * deltaTime);
+        return TryConsumeStamina(cost);
+    }
+
+    /// <summary>
+    /// 구르기용 스태미나 소모
+    /// </summary>
+    public bool TryConsumeRollStamina()
+    {
+        return TryConsumeStamina(data.rollingCost);
+    }
+
     /*───────────────────────────────*
      * 데미지 처리
      *───────────────────────────────*/
 
+    /// <summary>
+    /// 체력 데미지 처리
+    /// - 방어력 단순 감산
+    /// </summary>
     public void TakeDamage(int damage)
     {
-        // 방어력 단순 감산
         int finalDamage = Mathf.Max(1, damage - data.DEF);
         CurrentHP -= finalDamage;
 
@@ -91,7 +137,7 @@ public class PlayerCore : MonoBehaviour
 
     /// <summary>
     /// 강인도 데미지 적용
-    /// true 반환 시 경직 발생
+    /// true 반환 시 경직/히트 리액션 발생
     /// </summary>
     public bool ApplyPoiseDamage(int poiseDamage)
     {
@@ -115,7 +161,28 @@ public class PlayerCore : MonoBehaviour
      * 공격 스탯 제공 (무기 계산용)
      *───────────────────────────────*/
 
+    /// <summary>
+    /// 근력 스탯 (STR 계수 계산용)
+    /// </summary>
     public int STR => data.STR;
+
+    /// <summary>
+    /// 기량 스탯 (DEX 계수 계산용)
+    /// </summary>
     public int DEX => data.DEX;
+
+    /*───────────────────────────────*
+     * 이동 관련 수치 제공
+     *───────────────────────────────*/
+
+    /// <summary>
+    /// 걷기 이동 속도
+    /// </summary>
+    public float WalkSpeed => data.moveSpeed;
+
+    /// <summary>
+    /// 달리기 이동 속도
+    /// </summary>
+    public float RunSpeed => data.runSpeed;
 }
 

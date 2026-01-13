@@ -61336,8 +61336,15 @@ AnimationClip:
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
+  - time: 1.5333333
+    functionName: ComboCheck
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 0
+    messageOptions: 0
   - time: 1.6666666
-    functionName: ComboInputEnd
+    functionName: EndCombo
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
