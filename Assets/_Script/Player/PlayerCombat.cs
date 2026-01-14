@@ -135,29 +135,19 @@ public class PlayerCombat : MonoBehaviour
         weapon.EndAttack();
     }
 
-    public void ShootProjectile()
-    {
-
-    }
-
-    public void ShootChargeProjectile()
-    {
-
-    }
-
-
     //애니메이션 이벤트 - 프로젝타일 생성
-    public void FireProjectile(GameObject projectilePrefab, Transform firePoint)
+    public void ShootProjectile(GameObject prefab, Transform firePoint, Transform lockOnTarget)
     {
-        if (projectilePrefab == null || firePoint == null)
-            return;
+        GameObject obj = Instantiate(prefab, firePoint.position, firePoint.rotation);
 
-        Instantiate(
-            projectilePrefab,
-            firePoint.position,
-            firePoint.rotation
-        );
+        Projectile proj = obj.GetComponent<Projectile>();
+        if (proj != null && lockOnTarget != null)
+        {
+            proj.target = lockOnTarget;
+            Debug.Log("[CombatV2] 락온 투사체 타겟 지정");
+        }
     }
+
 
     /*───────────────────────────────*
      * 애니메이션 이벤트 - 히트박스 온 오프

@@ -23,6 +23,11 @@ public class InputManager : MonoBehaviour
     //1회성 액션 - 이벤트로 노출
     public static event Action OnAccess;      //상호작용 입력 이벤트
     public static event Action OnAttack;    //공격 입력 이벤트
+
+    public static event Action OnAttackStarted;
+    public static event Action OnAttackCanceled;
+
+
     public static event Action OnRolling;   //구르기 입력 이벤트
 
     public static event Action OnWeaponNone; //비무장 1번키
@@ -55,6 +60,11 @@ public class InputManager : MonoBehaviour
     Action<InputAction.CallbackContext> onBlockCanceled;
     Action<InputAction.CallbackContext> onAccessPerformed;
     Action<InputAction.CallbackContext> onAttackPerformed;
+
+    Action<InputAction.CallbackContext> onAttackStarted;
+    Action<InputAction.CallbackContext> onAttackCanceled;
+
+
     Action<InputAction.CallbackContext> onRollingPerformed;
     Action<InputAction.CallbackContext> onWeaponNonePerformed;
     Action<InputAction.CallbackContext> onWeaponAxePerformed;
@@ -125,9 +135,22 @@ public class InputManager : MonoBehaviour
         //공격액션 콜백등록
         if (attackAction != null)
         {
-            onAttackPerformed = ctx => OnAttack?.Invoke();
-            attackAction.performed += onAttackPerformed;
+            onAttackStarted = ctx =>
+            {
+                Debug.Log("[InputManager] 공격 버튼 눌림");
+                OnAttackStarted?.Invoke();
+            };
+
+            onAttackCanceled = ctx =>
+            {
+                Debug.Log("[InputManager] 공격 버튼 뗌");
+                OnAttackCanceled?.Invoke();
+            };
+
+            attackAction.started += onAttackStarted;
+            attackAction.canceled += onAttackCanceled;
         }
+
         //구르기액션 콜백등록
         if (rollingAction != null)
         {
