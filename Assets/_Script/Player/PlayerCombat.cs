@@ -135,6 +135,16 @@ public class PlayerCombat : MonoBehaviour
         weapon.EndAttack();
     }
 
+    public void ShootProjectile()
+    {
+
+    }
+
+    public void ShootChargeProjectile()
+    {
+
+    }
+
 
     //애니메이션 이벤트 - 프로젝타일 생성
     public void FireProjectile(GameObject projectilePrefab, Transform firePoint)

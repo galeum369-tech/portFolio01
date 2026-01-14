@@ -16,6 +16,9 @@ public class InputManager : MonoBehaviour
     //카메라 바라보는 방향
     public static Vector2 Look { get; private set; }
 
+    //락온
+    public static event Action OnLockOn;
+
 
     //1회성 액션 - 이벤트로 노출
     public static event Action OnAccess;      //상호작용 입력 이벤트
@@ -40,6 +43,7 @@ public class InputManager : MonoBehaviour
     InputAction weaponSwordAction;
     InputAction masicAction;
     InputAction lookAction;
+    InputAction lockOnAction;
 
 
     //콜백 함수들을 저장할 변수들
@@ -59,6 +63,8 @@ public class InputManager : MonoBehaviour
 
     Action<InputAction.CallbackContext> onLookPerformed;
     Action<InputAction.CallbackContext> onLookCanceled;
+
+    Action<InputAction.CallbackContext> onLockOnPerformed;
 
 
 
@@ -83,6 +89,8 @@ public class InputManager : MonoBehaviour
         masicAction = pi.actions.FindAction("Masic");
 
         lookAction = pi.actions.FindAction("Look");
+
+        lockOnAction = pi.actions.FindAction("LockOn");
 
         //무브 액션 콜백등록
         if (moveAction != null)
@@ -158,6 +166,12 @@ public class InputManager : MonoBehaviour
 
             lookAction.performed += onLookPerformed;
             lookAction.canceled += onLookCanceled;
+        }
+
+        if (lockOnAction != null)
+        {
+            onLockOnPerformed = ctx => OnLockOn?.Invoke();
+            lockOnAction.performed += onLockOnPerformed;
         }
     }
 }

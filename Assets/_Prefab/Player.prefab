@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4548828170273838673}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Weapons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24,8 +24,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1093017686915341944}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.21874, y: 1.07266, z: -0.09877}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -151,7 +151,8 @@ GameObject:
   - component: {fileID: 830554638913627727}
   - component: {fileID: 5615494099171994699}
   - component: {fileID: 5122071106714774052}
-  m_Layer: 6
+  - component: {fileID: 50377886359090574}
+  m_Layer: 8
   m_Name: FistHitboxR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -221,6 +222,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &50377886359090574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166145446512697798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b079646660e2e824e98f958c9b3fcdf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponHitBox
 --- !u!1 &1734216677610469642
 GameObject:
   m_ObjectHideFlags: 0
@@ -337,7 +350,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6631414524093164229}
   - component: {fileID: 7924616502105361514}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rig 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -596,7 +609,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1538348844548785196}
   - component: {fileID: 5294345544527084053}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Axe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -749,7 +762,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5678736825517104739}
   - component: {fileID: 4418949602234169486}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: HeadAim
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -835,7 +848,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4192440587607707926}
   - component: {fileID: 159376877783825932}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: FIst
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -936,7 +949,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6735081323967404157}
   - component: {fileID: 606346134114842615}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Sowrd
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1547,7 +1560,8 @@ GameObject:
   - component: {fileID: 928064368713867374}
   - component: {fileID: 7492142863063426506}
   - component: {fileID: 4747876462874894306}
-  m_Layer: 6
+  - component: {fileID: 422034606974030555}
+  m_Layer: 8
   m_Name: FistHitboxL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1617,6 +1631,18 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &422034606974030555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8494895171504486948}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b079646660e2e824e98f958c9b3fcdf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponHitBox
 --- !u!1 &9209593668293090700
 GameObject:
   m_ObjectHideFlags: 0
@@ -1699,6 +1725,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3031555021678472449, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 8304250016728671727, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1750,7 +1780,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3031555021678472449, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5129627595281536553}
   m_SourcePrefab: {fileID: 100100000, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
 --- !u!65 &553241242464462369 stripped
 BoxCollider:
@@ -1762,6 +1795,23 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 503464173844853446, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
   m_PrefabInstance: {fileID: 2115557065426764937}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &3983936122859743624 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3031555021678472449, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
+  m_PrefabInstance: {fileID: 2115557065426764937}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5129627595281536553
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3983936122859743624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b079646660e2e824e98f958c9b3fcdf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponHitBox
 --- !u!4 &7954879307320418662 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8304250016728671727, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
@@ -1823,6 +1873,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6522177573488942524, guid: 196055d8c72691643b193c078a4118f9, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1859,6 +1913,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1439574992244517920, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 3031555021678472449, guid: f0a13d28dac525147b5e2ac4c82282be, type: 3}
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
@@ -1929,6 +1987,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4511219179976131738}
     m_Modifications:
+    - target: {fileID: 3166513688892270960, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
+      propertyPath: m_Layer
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 4545908003571645876, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
       propertyPath: m_Layer
       value: 6
@@ -1988,7 +2050,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3166513688892270960, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8762309604433823389}
   m_SourcePrefab: {fileID: 100100000, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
 --- !u!4 &281902495686570259 stripped
 Transform:
@@ -2000,6 +2065,23 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5523526539425814840, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
   m_PrefabInstance: {fileID: 7189009691550440284}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &5203286315254264364 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3166513688892270960, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
+  m_PrefabInstance: {fileID: 7189009691550440284}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8762309604433823389
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5203286315254264364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b079646660e2e824e98f958c9b3fcdf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponHitBox
 --- !u!65 &5558445315368408804 stripped
 BoxCollider:
   m_CorrespondingSourceObject: {fileID: 3379932458375155128, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
@@ -2932,6 +3014,10 @@ PrefabInstance:
     - target: {fileID: 1474517872349038668, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
       propertyPath: m_IsTrigger
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3166513688892270960, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4545908003571645876, guid: b1b6703dcc06cf643a8ca2448a02b297, type: 3}
       propertyPath: m_Layer
