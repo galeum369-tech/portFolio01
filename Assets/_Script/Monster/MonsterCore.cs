@@ -5,6 +5,8 @@ using UnityEngine;
 /// - 체력 / 스태미나 / 강인도
 /// - 회복 처리
 /// - 적극성 계산
+/// - (추가) Intent(의도) 계산
+/// 
 /// FSM과 AI는 이 값을 '조회'만 한다.
 /// </summary>
 public class MonsterCore : MonoBehaviour
@@ -23,14 +25,30 @@ public class MonsterCore : MonoBehaviour
     // 마지막으로 맞은 공격 ID
     int lastHitAttackId = -1;
 
-
     // 마지막 스태미나 소비 시점 (회복 딜레이 계산용)
     float lastStaminaConsumeTime = -999f;
 
     public bool IsDead => CurrentHP <= 0f;
 
+    /*───────────────────────────────*
+     * Intent 디버그
+     *───────────────────────────────*/
+    [Header("디버그(선택)")]
+    [Tooltip("체크하면 Intent 변화 시 로그를 출력합니다.")]
+    [SerializeField] bool debugIntentLog = false;
+
+    MonsterIntent lastIntent = MonsterIntent.None;
+
     void Awake()
     {
+        // 방어 코드(데이터 누락)
+        if (baseData == null)
+        {
+            Debug.LogError("[MonsterCore] MonsterBaseData가 연결되지 않았습니다.", this);
+            enabled = false;
+            return;
+        }
+
         CurrentHP = baseData.maxHP;
         CurrentStamina = baseData.maxStamina;
         CurrentPoise = baseData.maxPoise;
@@ -39,7 +57,19 @@ public class MonsterCore : MonoBehaviour
     void Update()
     {
         if (IsDead) return;
+
         RecoverResources(Time.deltaTime);
+
+        // Intent 로그(선택)
+        if (debugIntentLog)
+        {
+            var intent = GetIntent();
+            if (intent != lastIntent)
+            {
+                Debug.Log($"[MonsterCore] Intent 변경: {lastIntent} → {intent}", this);
+                lastIntent = intent;
+            }
+        }
     }
 
     /*───────────────────────────────*
@@ -59,7 +89,6 @@ public class MonsterCore : MonoBehaviour
         // 스태미나 회복 (소비 후 딜레이 적용)
         if (baseData.staminaRecoveryPerSecond > 0f)
         {
-            // 마지막 소비 이후 일정 시간이 지나야 회복 시작
             if (Time.time >= lastStaminaConsumeTime + baseData.staminaRecoveryDelay)
             {
                 CurrentStamina = Mathf.Min(
@@ -69,7 +98,7 @@ public class MonsterCore : MonoBehaviour
             }
         }
 
-        // 강인도 회복 (즉시 회복 방식과 병행 가능)
+        // 강인도 회복
         if (baseData.poiseRecoveryPerSecond > 0f)
         {
             CurrentPoise = Mathf.Min(
@@ -92,15 +121,16 @@ public class MonsterCore : MonoBehaviour
         return true;
     }
 
-
     /*───────────────────────────────*
      * 데미지 / 소비 처리
      *───────────────────────────────*/
-
     public void TakeDamage(float damage)
     {
         float finalDamage = Mathf.Max(0f, damage - baseData.defense);
         CurrentHP -= finalDamage;
+
+        // 사망 처리(클램프)
+        if (CurrentHP < 0f) CurrentHP = 0f;
     }
 
     /// <summary>
@@ -114,9 +144,7 @@ public class MonsterCore : MonoBehaviour
 
     /// <summary>
     /// 강인도 판정용 함수
-    /// - 일반 몬스터: true → Hit 리액션 여부 판단
-    /// - 보스 몬스터: true → 경직 / 스태거 트리거 판단
-    /// 해석은 FSM에서 담당한다.
+    /// true → 경직/스태거 트리거 여부 (해석은 FSM에서)
     /// </summary>
     public bool ApplyPoiseDamage(float poiseDamage)
     {
@@ -139,10 +167,6 @@ public class MonsterCore : MonoBehaviour
     /*───────────────────────────────*
      * 적극성 계산
      *───────────────────────────────*/
-
-    /// <summary>
-    /// 현재 리소스를 기반으로 적극성 수준을 반환
-    /// </summary>
     public AggressionLevel GetAggressionLevel()
     {
         float hpRatio = CurrentHP / baseData.maxHP;
@@ -160,6 +184,54 @@ public class MonsterCore : MonoBehaviour
             return AggressionLevel.Balanced;
 
         return AggressionLevel.Low;
+    }
+
+    /*───────────────────────────────*
+     * Intent(의도) 계산
+     *───────────────────────────────*/
+
+    /// <summary>
+    /// 현재 리소스/상황을 기반으로 "지금 뭘 하고 싶은지"를 반환한다.
+    /// 
+    /// ✅ 설계 의도
+    /// - FSM은 상태 전이를 담당(언제)
+    /// - Intent는 행동 선택 기준(무엇을)
+    /// - Action은 실제 실행(어떻게)
+    /// 
+    /// 🔸 지금은 단순 버전(V1)
+    /// - AggressionLevel 기반으로만 매핑
+    /// - 추후 거리/시야/쿨다운/패턴 등 추가 가능
+    /// </summary>
+    public MonsterIntent GetIntent()
+    {
+        if (IsDead)
+            return MonsterIntent.None;
+
+        AggressionLevel aggro = GetAggressionLevel();
+
+        // (예시) 매우 단순 매핑
+        // High: 압박(공격 성향)
+        // Balanced: 전투 유지
+        // Low: 후퇴/회복 성향
+        switch (aggro)
+        {
+            case AggressionLevel.High:
+                return MonsterIntent.Pressure;
+
+            case AggressionLevel.Balanced:
+                return MonsterIntent.Engage;
+
+            case AggressionLevel.Low:
+                // Low일 때는 Retreat/Recover 중 무엇을 선택할지 정책을 정할 수 있음
+                // 지금은 "체력이 낮으면 Recover, 아니면 Retreat" 같은 규칙을 한 줄로 둠
+                float hpRatio = CurrentHP / baseData.maxHP;
+                if (hpRatio <= baseData.hpLowThreshold)
+                    return MonsterIntent.Recover;
+
+                return MonsterIntent.Retreat;
+        }
+
+        return MonsterIntent.None;
     }
 }
 

@@ -32,6 +32,9 @@ public class MonsterFSM : MonoBehaviour
 
     IMonsterAction[] actions;
 
+    [Header("디버그(의도)")]
+    public MonsterIntent CurrentIntent { get; private set; } = MonsterIntent.None;
+
     [Header("시야 인식")]
     public float viewAngle = 120f;
     public float viewDistance = 8f;
@@ -49,6 +52,11 @@ public class MonsterFSM : MonoBehaviour
     {
         if (CurrentState == State.Dead)
             return;
+
+        // ✅ 이번 프레임 의도 갱신 (Action들이 이 값을 참고 가능)
+        if (core != null)
+            CurrentIntent = core.GetIntent();
+
 
         switch (CurrentState)
         {
