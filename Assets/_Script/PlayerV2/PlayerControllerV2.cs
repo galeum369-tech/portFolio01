@@ -69,7 +69,7 @@ public class PlayerControllerV2 : MonoBehaviour
     [Tooltip("이 시간 이상 누르면 차지 공격으로 판정")]
     [SerializeField] float chargeThreshold = 0.7f;
 
-    bool isCharging;
+    public bool isCharging;
     float chargeTimer;
 
     /*───────────────────────────────*

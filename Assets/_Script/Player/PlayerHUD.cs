@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public class PlayerHUD : MonoBehaviour
 {
     [Header("참조")]
-    public PlayerCore core;
+    public PlayerCoreV2 core;
 
     [Header("UI")]
     public Image hpFill;
@@ -21,8 +21,8 @@ public class PlayerHUD : MonoBehaviour
     {
         if (core == null) return;
 
-        maxHP = core.GetComponent<PlayerCore>().CurrentHP;
-        maxStamina = core.GetComponent<PlayerCore>().CurrentStamina;
+        maxHP = core.GetComponent<PlayerCoreV2>().CurrentHP;
+        maxStamina = core.GetComponent<PlayerCoreV2>().CurrentStamina;
     }
 
     void Update()

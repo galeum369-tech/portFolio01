@@ -16,7 +16,6 @@ public class PlayerCombatV2 : MonoBehaviour
     [Header("References")]
     [SerializeField] Animator anim;
     [SerializeField] PlayerWeaponStateV2 weaponState;
-
     /*───────────────────────────────*
      * 상태
      *───────────────────────────────*/
@@ -30,10 +29,12 @@ public class PlayerCombatV2 : MonoBehaviour
     [SerializeField] float stuckTimeout = 5f;
 
     int hashAttack;
+    int hashCharge;
 
     void Awake()
     {
         hashAttack = Animator.StringToHash("Attack");
+        hashCharge = Animator.StringToHash("Charge");
     }
 
     void Update()
@@ -107,7 +108,7 @@ public class PlayerCombatV2 : MonoBehaviour
         ForceEndCombo();
         isAttacking = true;
 
-        anim.SetTrigger(hashAttack);
+        anim.SetTrigger(hashCharge);
     }
 
     void StartCombo()

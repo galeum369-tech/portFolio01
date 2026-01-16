@@ -74,17 +74,17 @@ public class PlayerController : MonoBehaviour
         hashBackstep = Animator.StringToHash("Backstep");
     }
 
-    void OnEnable()
-    {
-        InputManager.OnAttack += HandleAttack;
-        InputManager.OnRolling += HandleRolling;
-    }
+    //void OnEnable()
+    //{
+    //    InputManager.OnAttack += HandleAttack;
+    //    InputManager.OnRolling += HandleRolling;
+    //}
 
-    void OnDisable()
-    {
-        InputManager.OnAttack -= HandleAttack;
-        InputManager.OnRolling -= HandleRolling;
-    }
+    //void OnDisable()
+    //{
+    //    InputManager.OnAttack -= HandleAttack;
+    //    InputManager.OnRolling -= HandleRolling;
+    //}
 
     void Update()
     {

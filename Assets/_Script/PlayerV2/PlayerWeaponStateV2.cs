@@ -62,7 +62,7 @@ public class PlayerWeaponStateV2 : MonoBehaviour
         weaponSwapHash = Animator.StringToHash("WeaponSwap");
 
         // 초기 상태
-        DisableAllWeapons();
+        UnequipAllWeapons();
         axeUnequip.SetActive(true);
         swordUnequip.SetActive(true);
 
@@ -120,7 +120,7 @@ public class PlayerWeaponStateV2 : MonoBehaviour
     {
         Debug.Log("[WeaponStateV2] 무기 교체 적용");
 
-        DisableAllWeapons();
+        UnequipAllWeapons();
         ResetAnimatorLayers();
 
         IsComboWeapon = true;
@@ -171,11 +171,14 @@ public class PlayerWeaponStateV2 : MonoBehaviour
     /*───────────────────────────────*
      * 내부 유틸
      *───────────────────────────────*/
-    void DisableAllWeapons()
+    void UnequipAllWeapons()
     {
         axeEquip.SetActive(false);
+        axeUnequip.SetActive(true);
         swordEquip.SetActive(false);
+        swordUnequip.SetActive(true);
         magicObject.SetActive(false);
+        
     }
 
     void ResetAnimatorLayers()

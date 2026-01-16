@@ -22,7 +22,6 @@ public class InputManager : MonoBehaviour
 
     //1회성 액션 - 이벤트로 노출
     public static event Action OnAccess;      //상호작용 입력 이벤트
-    public static event Action OnAttack;    //공격 입력 이벤트
 
     public static event Action OnAttackStarted;
     public static event Action OnAttackCanceled;
@@ -59,7 +58,6 @@ public class InputManager : MonoBehaviour
     Action<InputAction.CallbackContext> onBlockPerformed;
     Action<InputAction.CallbackContext> onBlockCanceled;
     Action<InputAction.CallbackContext> onAccessPerformed;
-    Action<InputAction.CallbackContext> onAttackPerformed;
 
     Action<InputAction.CallbackContext> onAttackStarted;
     Action<InputAction.CallbackContext> onAttackCanceled;
