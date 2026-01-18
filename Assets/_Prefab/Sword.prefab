@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8304250016728671727}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Sword
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 7760056103236020465}
   - component: {fileID: 1942870081807852200}
   - component: {fileID: 5460575441739734793}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SwordHitbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -124,6 +124,10 @@ PrefabInstance:
     - target: {fileID: 1892742523658025197, guid: 560bb073a6dbf844a86357211738a096, type: 3}
       propertyPath: m_Name
       value: sword10
+      objectReference: {fileID: 0}
+    - target: {fileID: 1892742523658025197, guid: 560bb073a6dbf844a86357211738a096, type: 3}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 6023523644902293322, guid: 560bb073a6dbf844a86357211738a096, type: 3}
       propertyPath: m_LocalScale.x

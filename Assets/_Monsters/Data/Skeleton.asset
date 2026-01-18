@@ -27,6 +27,7 @@ MonoBehaviour:
   staminaHighThreshold: 0.6
   preferredRange: 2
   engageRange: 6
+  minAttackRange: 2
   disengageRange: 8
   baseHostility: 2
   hitReactionWeight: 0.5

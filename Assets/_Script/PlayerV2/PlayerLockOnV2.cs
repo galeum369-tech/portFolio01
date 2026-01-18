@@ -1,15 +1,16 @@
 using UnityEngine;
 
 /// <summary>
-/// LockOnSystemV2
+/// PlayerLockOnV2
 /// 
 /// [역할]
 /// - 락온 대상 탐색 / 유지 / 해제
 /// - 거리 / 시야각 / 사망 조건 관리
-/// - 카메라 & 플레이어에 "데이터만" 제공
+/// - PlayerController / Camera / UI에 "타겟 정보만" 제공
 /// 
 /// ⚠ 카메라 직접 제어 ❌
 /// ⚠ 회전 직접 제어 ❌
+/// ⚠ UI 직접 제어 ❌
 /// </summary>
 public class PlayerLockOnV2 : MonoBehaviour
 {
@@ -21,12 +22,16 @@ public class PlayerLockOnV2 : MonoBehaviour
     [SerializeField] LayerMask lockOnTargetLayer;
 
     PlayerControllerV2 controller;
+
     public bool IsLockOn { get; private set; }
     public Transform CurrentTarget { get; private set; }
 
     void Awake()
     {
         controller = GetComponent<PlayerControllerV2>();
+
+        if (controller == null)
+            Debug.LogError("[LockOnV2] PlayerControllerV2를 찾지 못했습니다.", this);
     }
 
     void OnEnable()
@@ -44,7 +49,7 @@ public class PlayerLockOnV2 : MonoBehaviour
         if (!IsLockOn || CurrentTarget == null)
             return;
 
-        // 사망 체크
+        // 1️⃣ 사망 체크
         MonsterCore monster = CurrentTarget.GetComponentInParent<MonsterCore>();
         if (monster == null || monster.IsDead)
         {
@@ -53,7 +58,7 @@ public class PlayerLockOnV2 : MonoBehaviour
             return;
         }
 
-        // 거리 체크
+        // 2️⃣ 거리 체크
         float dist = Vector3.Distance(transform.position, CurrentTarget.position);
         if (dist > lockOnRange)
         {
@@ -62,33 +67,33 @@ public class PlayerLockOnV2 : MonoBehaviour
         }
     }
 
+    /*───────────────────────────────*
+     * 락온 토글
+     *───────────────────────────────*/
     void ToggleLockOn()
     {
-        if (!IsLockOn)
-        {
-            Transform target = FindNearestTarget();
-            if (target == null)
-            {
-                Debug.Log("[LockOnV2] 락온 대상 없음");
-                return;
-            }
-
-            CurrentTarget = target;
-            IsLockOn = true;
-
-            // 🔗 컨트롤러에 락온 상태 전달
-            controller?.SetLockOn(true, CurrentTarget);
-
-            target.GetComponent<LockOnTarget>()?.Show();
-
-
-            Debug.Log($"[LockOnV2] 락온 ON : {target.name}");
-            target.GetComponent<LockOnTarget>()?.Show();
-        }
-        else
+        if (IsLockOn)
         {
             ReleaseLockOn();
+            return;
         }
+
+        Transform target = FindNearestTarget();
+        if (target == null)
+        {
+            Debug.Log("[LockOnV2] 락온 대상 없음");
+            return;
+        }
+
+        CurrentTarget = target;
+        IsLockOn = true;
+
+        controller?.SetLockOn(true, CurrentTarget);
+
+        // 월드용 타겟 표시 (UI 아님)
+        target.GetComponent<LockOnTarget>()?.Show();
+
+        Debug.Log($"[LockOnV2] 락온 ON : {target.name}");
     }
 
     void ReleaseLockOn()
@@ -99,12 +104,14 @@ public class PlayerLockOnV2 : MonoBehaviour
         CurrentTarget = null;
         IsLockOn = false;
 
-        // 🔗 컨트롤러에 해제 통보
         controller?.SetLockOn(false, null);
 
         Debug.Log("[LockOnV2] 락온 OFF");
     }
 
+    /*───────────────────────────────*
+     * 타겟 탐색
+     *───────────────────────────────*/
     Transform FindNearestTarget()
     {
         Collider[] hits = Physics.OverlapSphere(
@@ -118,6 +125,7 @@ public class PlayerLockOnV2 : MonoBehaviour
 
         foreach (var hit in hits)
         {
+            // LockOnTarget은 "락온 기준점" 역할
             LockOnTarget target = hit.GetComponent<LockOnTarget>();
             if (target == null)
                 continue;
@@ -143,6 +151,9 @@ public class PlayerLockOnV2 : MonoBehaviour
         return nearest;
     }
 
+    /*───────────────────────────────*
+     * Gizmo
+     *───────────────────────────────*/
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -156,5 +167,6 @@ public class PlayerLockOnV2 : MonoBehaviour
         Gizmos.DrawLine(transform.position, transform.position + right * lockOnRange);
     }
 }
+
 
 

@@ -1,24 +1,35 @@
 using UnityEngine;
-using System.Collections;
 
 /// <summary>
-/// PlayerControllerV2
-/// 
-/// [역할]
-/// - 이동 / 회전 / 중력 처리
-/// - 회피 실행(구르기/백스텝)
-/// - 차지 입력 판단(시간 측정)
-/// - 컨트롤 락(이동/회전 제한) 관리
-/// - 락온 여부에 따른 이동 애니메이션 보정(moveX / moveY)
-/// - 락온 중 캐릭터 회전 고정(타겟 응시)
-/// 
-/// ⚠ 공격 판정 / 데미지 계산 / 투사체 생성 ❌ (Combat 담당)
-/// ⚠ 애니메이션 상태 해석 ❌ (Combat 담당)
+/// PlayerControllerV2 (통합 최종본)
+///
+/// [State 개념]
+/// - 입력 제어권을 관리 (Free / Charging / Attacking / Evading)
+///
+/// [Mode 개념]
+/// - LockOn : 이동/회전/애니메이션 해석 방식만 변경
+/// - Guard  : 데미지 경감용 모드 (방향 판정 ❌)
+///
+/// ⚠ 공격 판정 / 데미지 계산 ❌ (Combat 담당)
+/// ⚠ 무적 타이밍 ❌ (Evade Animation Event 담당)
 /// </summary>
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerCoreV2))]
 public class PlayerControllerV2 : MonoBehaviour
 {
+    /*───────────────────────────────*
+     * 상태 정의
+     *───────────────────────────────*/
+    enum ControllerState
+    {
+        Free,
+        Charging,
+        Attacking,
+        Evading
+    }
+
+    ControllerState state = ControllerState.Free;
+
     /*───────────────────────────────*
      * 컴포넌트
      *───────────────────────────────*/
@@ -29,18 +40,16 @@ public class PlayerControllerV2 : MonoBehaviour
     [Header("전투")]
     [SerializeField] PlayerCombatV2 combat;
 
-    /*───────────────────────────────*
-     * 카메라
-     *───────────────────────────────*/
     [Header("카메라")]
     [SerializeField] Transform cameraRoot;
 
     /*───────────────────────────────*
-     * 이동 설정 (무게감)
+     * 이동 / 무게감
      *───────────────────────────────*/
-    [Header("이동(무게감)")]
+    [Header("이동")]
     [SerializeField] float acceleration = 12f;
     [SerializeField] float deceleration = 18f;
+    [SerializeField] float sprintMultiplier = 1.5f;
 
     float currentSpeed;
     Vector3 moveDirection;
@@ -50,41 +59,33 @@ public class PlayerControllerV2 : MonoBehaviour
      *───────────────────────────────*/
     float gravity = -20f;
     float verticalVelocity;
-    bool isGrounded;
 
     /*───────────────────────────────*
      * 회피
      *───────────────────────────────*/
     [Header("회피")]
     [SerializeField] float rollDistance = 4f;
-    [SerializeField] float backstepDistance = 2f;
+    [SerializeField] float rollDuration = 0.45f;
+    [SerializeField] float backstepDistance = 2.5f;
+    [SerializeField] float backstepDuration = 0.3f;
 
-    bool isEvading;
     Vector3 evadeDirection;
+    float evadeSpeed;
 
     /*───────────────────────────────*
      * 차지
      *───────────────────────────────*/
     [Header("차지")]
-    [Tooltip("이 시간 이상 누르면 차지 공격으로 판정")]
     [SerializeField] float chargeThreshold = 0.7f;
-
-    public bool isCharging;
     float chargeTimer;
 
     /*───────────────────────────────*
-     * 락온
+     * 락온 / 가드 (Mode)
      *───────────────────────────────*/
-    [Header("락온")]
     public bool IsLockOn { get; private set; }
     Transform lockOnTarget;
 
-    /*───────────────────────────────*
-     * 상태 플래그
-     *───────────────────────────────*/
-    bool isInAction;
-    bool canMove = true;
-    bool canRotate = true;
+    bool isGuarding;
 
     /*───────────────────────────────*
      * Animator Hash
@@ -93,6 +94,7 @@ public class PlayerControllerV2 : MonoBehaviour
     int hashMoveY;
     int hashRoll;
     int hashBackstep;
+    int hashBlock;
 
     /*───────────────────────────────*
      * 초기화
@@ -103,37 +105,52 @@ public class PlayerControllerV2 : MonoBehaviour
         core = GetComponent<PlayerCoreV2>();
         anim = GetComponentInChildren<Animator>();
 
+        if (combat == null)
+            combat = GetComponentInChildren<PlayerCombatV2>();
+
         hashMoveX = Animator.StringToHash("moveX");
         hashMoveY = Animator.StringToHash("moveY");
         hashRoll = Animator.StringToHash("Rolling");
         hashBackstep = Animator.StringToHash("Backstep");
-
-        if (combat == null)
-            combat = GetComponentInChildren<PlayerCombatV2>();
-
-        if (cameraRoot == null)
-            Debug.LogWarning("[ControllerV2] cameraRoot가 비어있습니다.");
+        hashBlock = Animator.StringToHash("Block");
     }
 
     void OnEnable()
     {
         InputManager.OnAttackStarted += OnAttackStarted;
         InputManager.OnAttackCanceled += OnAttackCanceled;
+        InputManager.OnRolling += TryEvade;
     }
 
     void OnDisable()
     {
         InputManager.OnAttackStarted -= OnAttackStarted;
         InputManager.OnAttackCanceled -= OnAttackCanceled;
+        InputManager.OnRolling -= TryEvade;
     }
 
+    /*───────────────────────────────*
+     * Update
+     *───────────────────────────────*/
     void Update()
     {
         HandleMovement();
+        HandleGuard();
         ApplyGravity();
 
-        if (isCharging)
+        if (state == ControllerState.Charging)
             chargeTimer += Time.deltaTime;
+    }
+
+    /*───────────────────────────────*
+     * FixedUpdate (회피 이동)
+     *───────────────────────────────*/
+    void FixedUpdate()
+    {
+        if (state == ControllerState.Evading)
+        {
+            cc.Move(evadeDirection * evadeSpeed * Time.fixedDeltaTime);
+        }
     }
 
     /*───────────────────────────────*
@@ -141,73 +158,63 @@ public class PlayerControllerV2 : MonoBehaviour
      *───────────────────────────────*/
     void HandleMovement()
     {
-        if (!canMove || cameraRoot == null)
+        Vector2 input = InputManager.Input;
+        bool hasInput = input.sqrMagnitude > 0.01f;
+
+        if (state != ControllerState.Free)
         {
-            anim.SetFloat(hashMoveX, 0f);
-            anim.SetFloat(hashMoveY, 0f);
+            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
+            ApplyMoveAnimation(Vector3.zero);
             return;
         }
 
-        Vector2 input = InputManager.Input;
-
-        // 카메라 기준 이동 방향
-        Vector3 camForward = cameraRoot.forward;
-        Vector3 camRight = cameraRoot.right;
-        camForward.y = 0f;
-        camRight.y = 0f;
-
+        Vector3 camForward = Vector3.ProjectOnPlane(cameraRoot.forward, Vector3.up).normalized;
+        Vector3 camRight = Vector3.ProjectOnPlane(cameraRoot.right, Vector3.up).normalized;
         moveDirection = (camForward * input.y + camRight * input.x).normalized;
 
-        // 무게감 있는 속도 변화
-        float targetSpeed = input.magnitude > 0.1f ? core.WalkSpeed : 0f;
-        currentSpeed = Mathf.MoveTowards(
-            currentSpeed,
-            targetSpeed,
-            (targetSpeed > currentSpeed ? acceleration : deceleration) * Time.deltaTime
-        );
+        float targetSpeed = hasInput ? core.WalkSpeed : 0f;
 
-        cc.Move(moveDirection * currentSpeed * Time.deltaTime);
-
-        /*──────── 회전 분기 ────────*/
-        if (canRotate)
+        if (hasInput && InputManager.IsSprint && !isGuarding)
         {
-            // 🔒 락온 중: 항상 타겟을 바라봄
-            if (IsLockOn && lockOnTarget != null)
-            {
-                Vector3 dir = lockOnTarget.position - transform.position;
-                dir.y = 0f;
-
-                if (dir.sqrMagnitude > 0.001f)
-                {
-                    Quaternion rot = Quaternion.LookRotation(dir);
-                    transform.rotation = Quaternion.Slerp(
-                        transform.rotation,
-                        rot,
-                        Time.deltaTime * 12f
-                    );
-                }
-            }
-            // 자유 상태: 이동 방향으로 회전
-            else if (moveDirection.sqrMagnitude > 0.001f)
-            {
-                Quaternion rot = Quaternion.LookRotation(moveDirection);
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation,
-                    rot,
-                    Time.deltaTime * 10f
-                );
-            }
+            if (core.TryConsumeRunStamina(Time.deltaTime))
+                targetSpeed *= sprintMultiplier;
         }
 
-        ApplyMoveAnimation(input);
+        float accel = targetSpeed > currentSpeed ? acceleration : deceleration;
+        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accel * Time.deltaTime);
+
+        if (currentSpeed > 0.01f)
+        {
+            cc.Move(moveDirection * currentSpeed * Time.deltaTime);
+            HandleRotation(hasInput);
+        }
+
+        ApplyMoveAnimation(moveDirection);
     }
 
-    /*───────────────────────────────*
-     * 이동 애니메이션 보정
-     *───────────────────────────────*/
-    void ApplyMoveAnimation(Vector2 input)
+    void HandleRotation(bool hasInput)
     {
-        if (input.magnitude < 0.1f)
+        if (IsLockOn && lockOnTarget != null)
+        {
+            Vector3 dir = lockOnTarget.position - transform.position;
+            dir.y = 0f;
+
+            if (dir.sqrMagnitude > 0.001f)
+            {
+                Quaternion rot = Quaternion.LookRotation(dir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 12f);
+            }
+        }
+        else if (hasInput && moveDirection.sqrMagnitude > 0.001f)
+        {
+            Quaternion rot = Quaternion.LookRotation(moveDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 10f);
+        }
+    }
+
+    void ApplyMoveAnimation(Vector3 dir)
+    {
+        if (dir.sqrMagnitude < 0.001f)
         {
             anim.SetFloat(hashMoveX, 0f);
             anim.SetFloat(hashMoveY, 0f);
@@ -216,16 +223,14 @@ public class PlayerControllerV2 : MonoBehaviour
 
         if (!IsLockOn)
         {
-            // 비 락온: 항상 정면 전진 느낌
             anim.SetFloat(hashMoveX, 0f);
-            anim.SetFloat(hashMoveY, 1f);
+            anim.SetFloat(hashMoveY, currentSpeed / core.WalkSpeed);
         }
         else
         {
-            // 락온: 사이드워크 / 후진 허용
-            Vector3 localDir = transform.InverseTransformDirection(moveDirection);
-            anim.SetFloat(hashMoveX, localDir.x);
-            anim.SetFloat(hashMoveY, localDir.z);
+            Vector3 local = transform.InverseTransformDirection(dir);
+            anim.SetFloat(hashMoveX, local.x);
+            anim.SetFloat(hashMoveY, local.z);
         }
     }
 
@@ -234,9 +239,7 @@ public class PlayerControllerV2 : MonoBehaviour
      *───────────────────────────────*/
     void ApplyGravity()
     {
-        isGrounded = cc.isGrounded;
-
-        if (isGrounded && verticalVelocity < 0f)
+        if (cc.isGrounded && verticalVelocity < 0f)
             verticalVelocity = -2f;
 
         verticalVelocity += gravity * Time.deltaTime;
@@ -244,86 +247,69 @@ public class PlayerControllerV2 : MonoBehaviour
     }
 
     /*───────────────────────────────*
-     * 공격 입력 (차지 판단)
+     * 공격 / 차지
      *───────────────────────────────*/
     void OnAttackStarted()
     {
-        if (isInAction || combat == null || combat.IsInAction)
+        if (state != ControllerState.Free || combat.IsInAction)
             return;
 
-        isCharging = true;
+        state = ControllerState.Charging;
         chargeTimer = 0f;
-
-        isInAction = true;
-        canMove = false;
-        canRotate = false;
-
-        Debug.Log("[ControllerV2] 공격 입력 시작 (차지 측정)");
     }
 
     void OnAttackCanceled()
     {
-        if (!isCharging)
+        if (state != ControllerState.Charging)
             return;
-
-        isCharging = false;
-
-        Debug.Log($"[ControllerV2] 공격 입력 종료 (차지 {chargeTimer:F2}s)");
 
         if (chargeTimer >= chargeThreshold)
             combat.ExecuteChargeAttack();
         else
             combat.ExecuteNormalAttack();
 
-        ReleaseControlLock();
+        state = ControllerState.Attacking;
+        Invoke(nameof(ReleaseAttackState), 0.1f);
     }
 
-    void ReleaseControlLock()
+    void ReleaseAttackState()
     {
-        isInAction = false;
-        canMove = true;
-        canRotate = true;
+        state = ControllerState.Free;
     }
 
     /*───────────────────────────────*
-     * 회피
+     * 회피 (입력 → 애니메이션만)
      *───────────────────────────────*/
-    public void TryEvade()
+    void TryEvade()
     {
-        if (isInAction)
+        if (state != ControllerState.Free)
             return;
 
         if (!core.TryConsumeRollStamina())
-        {
-            Debug.Log("[ControllerV2] 회피 실패: 스태미나 부족");
             return;
-        }
 
         bool hasInput = InputManager.Input.magnitude > 0.1f;
         evadeDirection = hasInput ? moveDirection : -transform.forward;
 
-        isInAction = true;
-        isEvading = true;
-        canMove = false;
-        canRotate = false;
+        float distance = hasInput ? rollDistance : backstepDistance;
+        float duration = hasInput ? rollDuration : backstepDuration;
+        evadeSpeed = distance / duration;
 
-        Debug.Log(hasInput ? "[ControllerV2] 구르기" : "[ControllerV2] 백스텝");
-
-        if (hasInput) anim.SetTrigger(hashRoll);
-        else anim.SetTrigger(hashBackstep);
+        state = ControllerState.Evading;
+        anim.SetTrigger(hasInput ? hashRoll : hashBackstep);
     }
 
+    /*───────────────────────────────*
+     * Evade Animation Event 수신
+     *───────────────────────────────*/
     public void OnEvadeStart()
     {
-        StartCoroutine(EvadeMoveCoroutine());
+        // 이동은 FixedUpdate에서 처리
     }
 
     public void OnEvadeEnd()
     {
-        isEvading = false;
-        isInAction = false;
-        canMove = true;
-        canRotate = true;
+        state = ControllerState.Free;
     }
 
     public void OnInvincibleStart()
@@ -336,57 +322,28 @@ public class PlayerControllerV2 : MonoBehaviour
         core.SetInvincible(false);
     }
 
-    IEnumerator EvadeMoveCoroutine()
+    /*───────────────────────────────*
+     * 가드
+     *───────────────────────────────*/
+    void HandleGuard()
     {
-        float distance = evadeDirection == -transform.forward
-            ? backstepDistance
-            : rollDistance;
-
-        float animLength = anim.GetCurrentAnimatorStateInfo(0).length;
-        if (animLength <= 0.01f) animLength = 0.4f;
-
-        float speed = distance / animLength;
-        float elapsed = 0f;
-
-        while (elapsed < animLength)
-        {
-            cc.Move(evadeDirection * speed * Time.deltaTime);
-            elapsed += Time.deltaTime;
-            yield return null;
-        }
+        bool guard = InputManager.IsBlock;
+        core.SetGuard(guard);
+        anim.SetBool(hashBlock, guard);
     }
 
+
     /*───────────────────────────────*
-     * 락온 시스템에서 호출
+     * 락온 연동
      *───────────────────────────────*/
     public void SetLockOn(bool value, Transform target)
     {
         IsLockOn = value;
         lockOnTarget = target;
-
-        Debug.Log(value ? "[ControllerV2] 락온 ON" : "[ControllerV2] 락온 OFF");
-    }
-
-    public Transform GetLockOnTarget()
-    {
-        return lockOnTarget;
-    }
-
-    /*───────────────────────────────*
-     * Gizmo
-     *───────────────────────────────*/
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.green;
-        Gizmos.DrawLine(transform.position, transform.position + moveDirection * 2f);
-
-        if (isEvading)
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawLine(transform.position, transform.position + evadeDirection * 3f);
-        }
     }
 }
+
+
 
 
 

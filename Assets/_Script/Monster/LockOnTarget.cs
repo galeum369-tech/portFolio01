@@ -2,19 +2,19 @@ using UnityEngine;
 
 public class LockOnTarget : MonoBehaviour
 {
-    Transform cam;
-    void Start()
-    {
-        cam = Camera.main.transform;
-    }
+    [SerializeField] GameObject worldIndicator;
+
     public void Show()
     {
-        gameObject.SetActive(true);
+        if (worldIndicator != null)
+            worldIndicator.SetActive(true);
     }
 
     public void Hide()
     {
-        gameObject.SetActive(false);
+        if (worldIndicator != null)
+            worldIndicator.SetActive(false);
     }
 }
+
 

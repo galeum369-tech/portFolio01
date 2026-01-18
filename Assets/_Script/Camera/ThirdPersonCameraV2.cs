@@ -1,14 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// ThirdPersonCameraControllerV2
-/// 
-/// [역할]
-/// - 자유 시 입력 기반 회전
-/// - 락온 시 타겟 응시
-/// 
-/// ⚠ 위치 이동 ❌ (CameraRoot가 담당)
-/// </summary>
 public class ThirdPersonCameraControllerV2 : MonoBehaviour
 {
     [Header("Free Look")]
@@ -19,16 +10,16 @@ public class ThirdPersonCameraControllerV2 : MonoBehaviour
     [Header("LockOn")]
     [SerializeField] float lockOnRotateSpeed = 8f;
 
-    [SerializeField] Transform player;
+    [Header("References")]
+    [SerializeField] PlayerLockOnV2 lockOn;   // 🔥 직접 연결
 
     float yaw;
     float pitch;
 
-    PlayerLockOnV2 lockOn;
-
     void Awake()
     {
-        lockOn = player.GetComponent<PlayerLockOnV2>();
+        if (lockOn == null)
+            Debug.LogWarning("[CameraV2] PlayerLockOnV2가 연결되지 않았습니다.");
     }
 
     void LateUpdate()
@@ -52,7 +43,7 @@ public class ThirdPersonCameraControllerV2 : MonoBehaviour
 
     void LockOnLook()
     {
-        Vector3 dir = lockOn.CurrentTarget.position - player.position;
+        Vector3 dir = lockOn.CurrentTarget.position - lockOn.transform.position;
         dir.y = 0f;
 
         if (dir.sqrMagnitude < 0.001f)
@@ -60,8 +51,8 @@ public class ThirdPersonCameraControllerV2 : MonoBehaviour
 
         Quaternion targetRot = Quaternion.LookRotation(dir.normalized);
 
-        transform.rotation = Quaternion.Slerp(
-            transform.rotation,
+        transform.localRotation = Quaternion.Slerp(
+            transform.localRotation,
             targetRot,
             Time.deltaTime * lockOnRotateSpeed
         );

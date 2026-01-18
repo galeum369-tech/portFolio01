@@ -69,6 +69,9 @@ public class MonsterBaseData : ScriptableObject
     [Tooltip("이 거리 안에 들어오면 전투를 개시")]
     public float engageRange = 6.0f;
 
+    [Tooltip("몬스터가 유지할 최소 거리")]
+    public float minAttackRange = 1f;
+
     [Tooltip("이 거리 이상이면 추격을 포기")]
     public float disengageRange = 8.0f;
 

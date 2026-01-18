@@ -6,15 +6,19 @@ using UnityEngine;
 /// [역할]
 /// - 플레이어의 런타임 전투 수치 관리
 /// - 체력 / 스태미나 / 강인도
-/// - 스태미나 점진 회복 (딜레이 없음)
-/// - 무적 상태에 따른 데미지 차단
+/// - 스태미나 점진 회복
+/// - 무적 / 가드 상태에 따른 데미지 처리
+/// - 히트 판정 및 히트 리액션 처리
 /// 
 /// ⚠ 행동 판단 ❌
 /// ⚠ 입력 처리 ❌
-/// Controller / Combat은 "요청"만 한다.
+/// → Controller / Combat / HitBox는 "요청"만 한다.
 /// </summary>
 public class PlayerCoreV2 : MonoBehaviour
 {
+    /*───────────────────────────────*
+     * 데이터
+     *───────────────────────────────*/
     [Header("플레이어 데이터")]
     [SerializeField] private PlayerBaseData data;
 
@@ -22,7 +26,7 @@ public class PlayerCoreV2 : MonoBehaviour
      * 런타임 상태
      *───────────────────────────────*/
     public int CurrentHP { get; private set; }
-    public int CurrentStamina { get; private set; }
+    public float CurrentStamina { get; private set; }
     public int CurrentPoise { get; private set; }
 
     public bool IsDead => CurrentHP <= 0;
@@ -31,63 +35,73 @@ public class PlayerCoreV2 : MonoBehaviour
      * 상태 플래그
      *───────────────────────────────*/
     bool isInvincible;
+    bool isGuarding;
+    bool isHitStopping;
 
+    /*───────────────────────────────*
+     * 가드 설정
+     *───────────────────────────────*/
+    [Header("가드")]
+    [Tooltip("가드 시 데미지 경감 비율 (0.3 = 30% 감소)")]
+    [Range(0f, 1f)]
+    [SerializeField] float guardDamageReduction = 0.3f;
+
+    /*───────────────────────────────*
+     * 히트 연출
+     *───────────────────────────────*/
+    [Header("히트 연출")]
+    [SerializeField] Animator anim;
+    [Tooltip("일반 히트 시 멈춤 시간")]
+    [SerializeField] float hitStopTime = 0.25f;
+    [Tooltip("강인도 붕괴 시 멈춤 시간")]
+    [SerializeField] float staggerStopTime = 0.4f;
+
+    /*───────────────────────────────*
+     * 초기화
+     *───────────────────────────────*/
     void Awake()
     {
         if (data == null)
         {
-            Debug.LogError("[PlayerCore] PlayerBaseData가 설정되지 않았습니다.", this);
+            Debug.LogError("[PlayerCoreV2] PlayerBaseData가 설정되지 않았습니다.", this);
             enabled = false;
             return;
         }
 
+        if (anim == null)
+            anim = GetComponentInChildren<Animator>();
+
         CurrentHP = data.maxHP;
         CurrentStamina = data.maxStamina;
         CurrentPoise = data.Poise;
-
-        Debug.Log("[PlayerCore] 초기화 완료");
     }
 
     void Update()
     {
         if (IsDead) return;
-
         RecoverStamina(Time.deltaTime);
     }
 
     /*───────────────────────────────*
-     * 스태미나 회복 (딜레이 없음)
+     * 스태미나
      *───────────────────────────────*/
-
     void RecoverStamina(float deltaTime)
     {
-        int before = CurrentStamina;
+        if (CurrentStamina >= data.maxStamina)
+            return;
 
-        CurrentStamina = Mathf.Min(
-            data.maxStamina,
-            CurrentStamina + Mathf.RoundToInt(data.staminaRegen * deltaTime)
-        );
+        CurrentStamina += data.staminaRegen * deltaTime;
 
-        if (before != CurrentStamina)
-        {
-            Debug.Log($"[PlayerCore] 스태미나 회복: {before} → {CurrentStamina}");
-        }
+        if (CurrentStamina > data.maxStamina)
+            CurrentStamina = data.maxStamina;
     }
 
-    /*───────────────────────────────*
-     * 스태미나 소모
-     *───────────────────────────────*/
-
-    public bool TryConsumeStamina(int amount)
+    public bool TryConsumeStamina(float amount)
     {
         if (CurrentStamina < amount)
-        {
-            Debug.Log("[PlayerCore] 스태미나 부족");
             return false;
-        }
 
         CurrentStamina -= amount;
-        Debug.Log($"[PlayerCore] 스태미나 소모: -{amount}, 잔여 {CurrentStamina}");
         return true;
     }
 
@@ -103,52 +117,64 @@ public class PlayerCoreV2 : MonoBehaviour
     }
 
     /*───────────────────────────────*
-     * 데미지 처리
+     * 외부 공격 통합 진입점
      *───────────────────────────────*/
 
-    public void TakeDamage(int damage)
+    /// <summary>
+    /// 몬스터 / 투사체 / 트랩 등
+    /// 외부 공격의 단일 진입점
+    /// </summary>
+    public void ReceiveAttack(int damage, int poiseDamage)
     {
-        if (isInvincible)
-        {
-            Debug.Log("[PlayerCore] 무적 상태 - 데미지 무시");
+        if (isInvincible || IsDead)
             return;
-        }
 
         int finalDamage = Mathf.Max(1, damage - data.DEF);
-        CurrentHP -= finalDamage;
 
-        Debug.Log($"[PlayerCore] 데미지 {finalDamage} 적용, 남은 HP {CurrentHP}");
+        if (isGuarding)
+            finalDamage = Mathf.RoundToInt(finalDamage * (1f - guardDamageReduction));
+
+        ApplyHPDamage(finalDamage);
+
+        bool poiseBroken = ApplyPoiseDamage(poiseDamage);
+
+        PlayHitReaction(poiseBroken);
+    }
+
+    /*───────────────────────────────*
+     * 기존 코드 호환용 (중요)
+     *───────────────────────────────*/
+
+    /// <summary>
+    /// 기존 몬스터 히트박스 호환용
+    /// </summary>
+    public void TakeDamage(int damage)
+    {
+        ReceiveAttack(damage, 0);
+    }
+
+    /*───────────────────────────────*
+     * 내부 처리
+     *───────────────────────────────*/
+
+    void ApplyHPDamage(int amount)
+    {
+        CurrentHP -= amount;
 
         if (CurrentHP < 0)
             CurrentHP = 0;
     }
 
-    /*───────────────────────────────*
-     * 무적 제어
-     *───────────────────────────────*/
-
-    public void SetInvincible(bool value)
+    bool ApplyPoiseDamage(int poiseDamage)
     {
-        isInvincible = value;
-        Debug.Log(value
-            ? "[PlayerCore] 무적 ON"
-            : "[PlayerCore] 무적 OFF");
-    }
+        if (poiseDamage <= 0)
+            return false;
 
-    /*───────────────────────────────*
-     * 강인도 (Poise)
-     *───────────────────────────────*/
-
-    public bool ApplyPoiseDamage(int poiseDamage)
-    {
         CurrentPoise -= poiseDamage;
-
-        Debug.Log($"[PlayerCore] 강인도 감소: -{poiseDamage}, 잔여 {CurrentPoise}");
 
         if (CurrentPoise <= 0)
         {
             ResetPoise();
-            Debug.Log("[PlayerCore] 강인도 붕괴 → 리셋");
             return true;
         }
 
@@ -161,7 +187,46 @@ public class PlayerCoreV2 : MonoBehaviour
     }
 
     /*───────────────────────────────*
-     * 스탯 제공
+     * 히트 리액션
+     *───────────────────────────────*/
+
+    void PlayHitReaction(bool stagger)
+    {
+        if (isHitStopping)
+            return;
+
+        isHitStopping = true;
+
+        if (anim != null)
+            anim.SetTrigger("Hit");
+
+        float stopTime = stagger ? staggerStopTime : hitStopTime;
+        Invoke(nameof(ReleaseHitStop), stopTime);
+    }
+
+    void ReleaseHitStop()
+    {
+        isHitStopping = false;
+    }
+
+    /*───────────────────────────────*
+     * 상태 제어
+     *───────────────────────────────*/
+
+    public void SetGuard(bool value)
+    {
+        isGuarding = value;
+    }
+
+    public bool IsGuarding => isGuarding;
+
+    public void SetInvincible(bool value)
+    {
+        isInvincible = value;
+    }
+
+    /*───────────────────────────────*
+     * 스탯 제공 (Controller 전용)
      *───────────────────────────────*/
 
     public int STR => data.STR;
@@ -170,3 +235,5 @@ public class PlayerCoreV2 : MonoBehaviour
     public float WalkSpeed => data.moveSpeed;
     public float RunSpeed => data.runSpeed;
 }
+
+

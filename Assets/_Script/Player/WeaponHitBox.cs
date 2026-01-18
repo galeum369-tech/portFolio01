@@ -1,10 +1,11 @@
 using UnityEngine;
 
+
 /// <summary>
-/// 무기 공격용 히트박스
+/// 플레이어 공격 히트박스
+/// - WeaponBase에서 데미지/포이즈 값 참조
 /// - 충돌 감지만 담당
-/// - 공격 단위 중복 피격 방지
-/// - 실제 판단은 MonsterCore에서 수행
+/// - 실제 반응(FSM 전이)은 몬스터 FSM이 처리
 /// </summary>
 public class WeaponHitBox : MonoBehaviour
 {
@@ -12,8 +13,13 @@ public class WeaponHitBox : MonoBehaviour
 
     void Awake()
     {
-        // 부모에 WeaponBase가 반드시 하나 존재해야 함
+        // 기존 구조 유지
         weapon = GetComponentInParent<WeaponBase>();
+
+        if (weapon == null)
+        {
+            Debug.LogError("[PlayerAttackHitBox] WeaponBase를 찾지 못했습니다.", this);
+        }
     }
 
     void OnTriggerEnter(Collider other)
@@ -21,23 +27,15 @@ public class WeaponHitBox : MonoBehaviour
         if (weapon == null)
             return;
 
-        // 몬스터 코어 찾기 (HitCollider가 자식일 수도 있음)
-        MonsterCore monster = other.GetComponentInParent<MonsterCore>();
+        // 몬스터 FSM 기준으로 처리 (가장 단순 & 안정적)
+        MonsterFSM_V2 monster = other.GetComponentInParent<MonsterFSM_V2>();
         if (monster == null)
             return;
 
-        // 이 공격에서 이미 맞았는지 체크
-        if (!monster.CanBeHit(weapon.CurrentAttackId))
-            return;
-
-        // 데미지 적용
-        monster.TakeDamage(weapon.CalculateDamage());
-
-        // 강인도 처리
-        if (monster.ApplyPoiseDamage(weapon.GetPoiseDamage()))
-        {
-            // 경직/스태거는 FSM에서 처리
-        }
+        monster.TakeDamage(
+            weapon.CalculateDamage(),
+            weapon.GetPoiseDamage()
+        );
     }
 }
 

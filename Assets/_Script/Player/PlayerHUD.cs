@@ -15,7 +15,7 @@ public class PlayerHUD : MonoBehaviour
     public Image staminaFill;
 
     int maxHP;
-    int maxStamina;
+    float maxStamina;
 
     void Start()
     {
